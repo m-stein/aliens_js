@@ -2,16 +2,19 @@ import { GameObject } from './game_object.js';
 import { Vector2 } from './vector_2.js';
 import { Rectangle } from './rectangle.js';
 import { Sprite } from './sprite.js';
+import { TimedValue } from "./timed_value.js";
 
 export class Player extends GameObject
 {
     constructor(fb_rect, image, pressed_keys) {
-        super(new Vector2(100, 100), 'Player');
-        this.sprite = new Sprite
-        ({
+        super(new Vector2(200, 250), 'Player');
+        this.sprite = new Sprite({
+            position: new Vector2(0, 0),
             sourceImage: image,
             frameSize: new Vector2(32, 32),
-            position: new Vector2(0, 0),
+            numColumns: 2,
+            numRows: 1,
+            drawFrameIndex: 0,
         });
         this.fb_rect = fb_rect
         this.pressed_keys = pressed_keys
@@ -22,6 +25,11 @@ export class Player extends GameObject
         this.max_y = this.fb_rect.height - this.collider_offset.y - this.collider_size.y
         this.min_x = -this.collider_offset.x
         this.max_x = this.fb_rect.width - this.collider_offset.x - this.collider_size.x
+        this.frameIdx = new TimedValue([
+            { ms: 100, value: 0 },
+            { ms: 100, value: 1 },
+        ]);
+        this.addChild(this.frameIdx);
         this.addChild(this.sprite);
     }
 
@@ -30,7 +38,9 @@ export class Player extends GameObject
     }
 
     update(delta_time) {
+        this.updateChildren(delta_time);
         this._update_position(delta_time)
+        this.sprite.currFrameIndex = this.frameIdx.value();
     }
 
     _update_position(delta_time) {
