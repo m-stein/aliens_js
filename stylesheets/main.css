@@ -7,5 +7,10 @@ html, body {
 }
 
 #mainCanvas {
-    width: 100%;
+    /* scale up by factor 2 - must be adapted to canvas width */
+    width: 800px;
+
+    /* center horizontally */
+    display: block;
+    margin: 0 auto;
 }
