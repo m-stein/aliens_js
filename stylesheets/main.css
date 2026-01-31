@@ -3,10 +3,12 @@ html, body {
     margin: 0;
     overflow: hidden;
     image-rendering: pixelated;
-    background-color: #080808;
+    background-color: #101010;
 }
 
 #mainCanvas {
+    background-color: #000000;
+    
     /* scale up by factor 2 - must be adapted to canvas width */
     width: 800px;
 
