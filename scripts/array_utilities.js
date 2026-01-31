@@ -1,4 +1,4 @@
-import { randomIntInclusive } from "./math.js";
+import { randomInt } from "./math.js";
 
 export function removeItem(array, item)
 {
@@ -11,7 +11,7 @@ export function removeItem(array, item)
 
 export function getRandomItem(array)
 {
-    return array[randomIntInclusive(0, array.length - 1)];
+    return array[randomInt(0, array.length)];
 }
 
 export function cloneArray(array)

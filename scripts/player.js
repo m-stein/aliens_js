@@ -18,7 +18,7 @@ export class Player extends GameObject
         });
         this.fb_rect = fb_rect
         this.pressed_keys = pressed_keys
-        this.speed = 0.3
+        this.speed = 300 / 1000
         this.collider_offset = new Vector2(10, 7)
         this.collider_size = new Vector2(11, 17)
         this.min_y = this.fb_rect.height - 100 - this.collider_offset.y

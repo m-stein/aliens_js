@@ -1,4 +1,4 @@
-import { randomIntInclusive } from "./math.js";
+import { randomInt } from "./math.js";
 
 export class TimedValue
 {
@@ -17,7 +17,7 @@ export class TimedValue
     startPhaseWithRandomTimeOffset(phaseIdx)
     {
         this.phaseIdx = phaseIdx;
-        this.remainingTimeMs = randomIntInclusive(0, this.phases[phaseIdx].ms - 1);
+        this.remainingTimeMs = randomInt(0, this.phases[phaseIdx].ms);
     }
 
     update(deltaTimeMs)

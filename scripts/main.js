@@ -7,6 +7,7 @@ import { ImageFile } from './image_file.js';
 import { removeItem } from './array_utilities.js';
 import { Server } from './server.js';
 import { Player } from './player.js';
+import { Stars } from './stars.js';
 
 class Main extends GameObject
 {
@@ -81,7 +82,7 @@ class Main extends GameObject
         };
         this.loadingAssets.push(...this.backgroundMusicFiles);
         Object.values(this.images).forEach((image) => { this.loadingAssets.push(image); });
-        this.camera = new Camera(this.images.sky, this.canvas.width, this.canvas.height);
+        this.camera = new Camera(null, this.canvas.width, this.canvas.height);
         this.gameEngine = new GameEngine
         ({
             rootGameObj: this,
@@ -91,8 +92,16 @@ class Main extends GameObject
         });
         this.onAllAssetsLoaded = () =>
         {
-            this.player = new Player(this.canvasRect, this.images.player, this.pressedKeys);
             this.addChild(this.camera);
+            this.starsLayers = [
+                new Stars(0.5, 30 / 1000, this.canvasRect, 200, this.window.document),
+                new Stars(0.3, 20 / 1000, this.canvasRect, 200, this.window.document),
+                new Stars(0.2, 10 / 1000, this.canvasRect, 200, this.window.document),
+            ];
+            for (const layer of this.starsLayers) {
+                this.addChild(layer);
+            }
+            this.player = new Player(this.canvasRect, this.images.player, this.pressedKeys);
             this.addChild(this.player);
             this.gameEngine.start();
         }

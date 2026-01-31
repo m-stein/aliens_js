@@ -27,4 +27,15 @@ export class DrawingContext
         this.canvasContext.textAlign = alignment;
         this.canvasContext.fillText(text, this.position.x + position.x, this.position.y + position.y);
     }
+
+    drawRect(rect, color)
+    {
+        this.canvasContext.fillStyle = color;
+        this.canvasContext.fillRect(
+            rect.position.x,
+            rect.position.y,
+            rect.width,
+            rect.height
+        );
+    }
 }

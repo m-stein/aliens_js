@@ -20,11 +20,9 @@ export function clamp(value, min, max)
     return Math.min(Math.max(value, min), max);
 }
 
-export function randomIntInclusive(min, max)
+export function randomInt(minInclusive, maxExclusive)
 {
-    const minCeiled = Math.ceil(min);
-    const maxFloored = Math.floor(max);
-    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
+    return Math.floor(Math.random() * (maxExclusive - minInclusive)) + minInclusive;
 }
 
 export function rotateQuadrMatrix2CoordClockwise(coord, matrixSize, numRotations)
