@@ -32,11 +32,32 @@ export class Vector2
         }
         return this;
     }
+
+    scale(factor)
+    {
+        this.x *= factor;
+        this.y *= factor;
+        return this;
+    }
     
     subtract(other)
     {
         this.x -= other.x;
         this.y -= other.y;
         return this;
+    }
+
+    length()
+    {
+        return Math.hypot(this.x, this.y);
+    }
+
+    normalized()
+    {
+        const len = this.length();
+        if (len === 0) {
+            return new Vector2(0, 0);
+        }
+        return new Vector2(this.x / len, this.y / len);
     }
 }

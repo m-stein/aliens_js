@@ -6,9 +6,12 @@ import { Rectangle } from './rectangle.js';
 import { ImageFile } from './image_file.js';
 import { removeItem } from './array_utilities.js';
 import { Server } from './server.js';
+import { Player } from './player.js';
 
 class Main extends GameObject
 {
+    pressedKeys = new Set();
+
     onMouseMove = (event) => { this.updateRawMousePosition(event); }
 
     updateRawMousePosition(event)
@@ -28,10 +31,12 @@ class Main extends GameObject
 
     onKeyDown = (event) =>
     {
-        if (this.loadingAssets.length)
-        {
-            return;
-        }
+        this.pressedKeys.add(event.code)
+    }
+
+    onKeyUp = (event) =>
+    {
+        this.pressedKeys.delete(event.code)
     }
 
     onMouseDown = (event) =>
@@ -65,12 +70,14 @@ class Main extends GameObject
         this.mouseDownHandlers = [];
         this.canvas.addEventListener("mousedown", this.onMouseDown);
         this.window.addEventListener('keydown', this.onKeyDown);
+        this.window.addEventListener('keyup', this.onKeyUp);
 
         /* Start loading common assets */
         this.loadingAssets = [];
         this.backgroundMusicFiles = [];
         this.images = {
             sky: new ImageFile(this.window.document, this.rootPath + "/images/sky.png", this.onAssetLoaded),
+            player: new ImageFile(this.window.document, this.rootPath + "/images/player.png", this.onAssetLoaded),
         };
         this.loadingAssets.push(...this.backgroundMusicFiles);
         Object.values(this.images).forEach((image) => { this.loadingAssets.push(image); });
@@ -84,7 +91,9 @@ class Main extends GameObject
         });
         this.onAllAssetsLoaded = () =>
         {
+            this.player = new Player(this.canvasRect, this.images.player, this.pressedKeys);
             this.addChild(this.camera);
+            this.addChild(this.player);
             this.gameEngine.start();
         }
     }
