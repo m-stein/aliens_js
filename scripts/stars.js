@@ -10,7 +10,7 @@ export class Stars extends GameObject
     {
         super(rect.position, "Stars");
         this.width  = rect.width;
-        this.height = rect.height;
+        this.height = rect.height * 3;
         this.numStars = numStars;
         const canvas = htmlDocument.createElement("canvas");
         canvas.width  = this.width;
