@@ -16,6 +16,7 @@ export class Player extends GameObject
             numRows: 1,
             drawFrameIndex: 0,
         });
+        this.rifle_tip_offset = new Vector2(15.5, 4);
         this.fb_rect = fb_rect
         this.pressed_keys = pressed_keys
         this.speed = 300 / 1000
@@ -31,6 +32,19 @@ export class Player extends GameObject
         ]);
         this.addChild(this.frameIdx);
         this.addChild(this.sprite);
+    }
+
+    rifle_tip()
+    {
+        return new Vector2(
+            this.position.x + this.rifle_tip_offset.x,
+            this.position.y + this.rifle_tip_offset.y
+        );
+    }
+
+    ready_to_shoot()
+    {
+        return true;
     }
 
     draw(drawingContext) {

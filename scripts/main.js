@@ -8,6 +8,8 @@ import { removeItem } from './array_utilities.js';
 import { Server } from './server.js';
 import { Player } from './player.js';
 import { Stars } from './stars.js';
+import { Settings } from './settings.js';
+import { Bullet } from './bullet.js';
 
 class Main extends GameObject
 {
@@ -32,6 +34,14 @@ class Main extends GameObject
 
     onKeyDown = (event) =>
     {
+        const shoot = this.settings.keyShoot();
+        if (event.code == shoot && !this.pressedKeys.has(shoot)) {
+            if (this.player.ready_to_shoot() && this.bullets.length < this.max_num_bullets) {
+                let bullet = new Bullet(this.player.rifle_tip(), this.images.bullet);
+                this.bullets.push(bullet);
+                this.addChild(bullet);
+            }
+        }
         this.pressedKeys.add(event.code)
     }
 
@@ -60,6 +70,9 @@ class Main extends GameObject
         this.jsonParser = jsonParser;
         this.canvas = this.window.document.getElementById(scriptElem.getAttribute('canvasId'));
         this.canvasRect = new Rectangle(new Vector2(0, 0), this.canvas.width, this.canvas.height);
+        this.settings = new Settings();
+        this.bullets = [];
+        this.max_num_bullets = 3;
 
         /* Initialize mouse position tracking */
         this.mouseDown = false;
@@ -77,8 +90,8 @@ class Main extends GameObject
         this.loadingAssets = [];
         this.backgroundMusicFiles = [];
         this.images = {
-            sky: new ImageFile(this.window.document, this.rootPath + "/images/sky.png", this.onAssetLoaded),
             player: new ImageFile(this.window.document, this.rootPath + "/images/player.png", this.onAssetLoaded),
+            bullet: new ImageFile(this.window.document, this.rootPath + "/images/bullet.png", this.onAssetLoaded),
         };
         this.loadingAssets.push(...this.backgroundMusicFiles);
         Object.values(this.images).forEach((image) => { this.loadingAssets.push(image); });
@@ -122,6 +135,12 @@ class Main extends GameObject
             this.mousePositionOutdated = false;
         }
         this.updateChildren(deltaTimeMs);
+        for (let i = this.bullets.length - 1; i >= 0; i--) {
+            if (this.bullets[i].outOfSight()) {
+                this.removeChild(this.bullets[i]);
+                this.bullets.splice(i, 1);
+            }
+        }
     }
 
     draw(drawingContext)
