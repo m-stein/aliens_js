@@ -10,6 +10,7 @@ import { Player } from './player.js';
 import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
+import { AudioFile } from './audio_file.js';
 
 class Main extends GameObject
 {
@@ -37,12 +38,17 @@ class Main extends GameObject
         const shoot = this.settings.keyShoot();
         if (event.code == shoot && !this.pressedKeys.has(shoot)) {
             if (this.player.ready_to_shoot() && this.bullets.length < this.max_num_bullets) {
-                let bullet = new Bullet(this.player.rifle_tip(), this.images.bullet);
+                let bullet = new Bullet(this.player.rifle_tip(), this.assets.images.bullet);
                 this.bullets.push(bullet);
                 this.addChild(bullet);
+                const sound = this.assets.sounds.player_laser.htmlElement;
+                sound.pause();
+                sound.currentTime = 0;
+                sound.play();
             }
         }
         this.pressedKeys.add(event.code)
+        this.assets.music.battle.htmlElement.play();
     }
 
     onKeyUp = (event) =>
@@ -88,13 +94,21 @@ class Main extends GameObject
 
         /* Start loading common assets */
         this.loadingAssets = [];
-        this.backgroundMusicFiles = [];
-        this.images = {
-            player: new ImageFile(this.window.document, this.rootPath + "/images/player.png", this.onAssetLoaded),
-            bullet: new ImageFile(this.window.document, this.rootPath + "/images/bullet.png", this.onAssetLoaded),
-        };
-        this.loadingAssets.push(...this.backgroundMusicFiles);
-        Object.values(this.images).forEach((image) => { this.loadingAssets.push(image); });
+        this.assets = {
+            images: {
+                player: new ImageFile(this.window.document, this.rootPath + "/images/player.png", this.onAssetLoaded),
+                bullet: new ImageFile(this.window.document, this.rootPath + "/images/bullet.png", this.onAssetLoaded),
+            },
+            music: {
+                battle: new AudioFile(this.window.document, this.rootPath + "/music/battle.ogg", this.onAssetLoaded)
+            },
+            sounds: {
+                player_laser: new AudioFile(this.window.document, this.rootPath + "/sounds/player_laser.wav", this.onAssetLoaded)
+            }
+        }
+        Object.values(this.assets).forEach((category) => {
+            Object.values(category).forEach((asset) => { this.loadingAssets.push(asset); });
+        });
         this.camera = new Camera(null, this.canvas.width, this.canvas.height);
         this.gameEngine = new GameEngine
         ({
@@ -114,7 +128,7 @@ class Main extends GameObject
             for (const layer of this.starsLayers) {
                 this.addChild(layer);
             }
-            this.player = new Player(this.canvasRect, this.images.player, this.pressedKeys);
+            this.player = new Player(this.canvasRect, this.assets.images.player, this.pressedKeys);
             this.addChild(this.player);
             this.gameEngine.start();
         }
