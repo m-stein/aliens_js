@@ -1,0 +1,74 @@
+import { GameObject } from "./game_object.js";
+import { Sprite } from "./sprite.js";
+import { TimedValue } from "./timed_value.js";
+import { Vector2 } from "./vector_2.js";
+
+export class AlienBullet extends GameObject
+{
+    constructor(rifleTip, fbHeight, image)
+    {
+        super(rifleTip.copy(), "AlienBullet");
+        this.width = 8;
+        this.height = 8;
+        this.fbHeight = fbHeight;
+
+        this.position = new Vector2(
+            rifleTip.x - this.width / 2,
+            rifleTip.y - this.height
+        );
+
+        this.speed = 200.0 / 1000;
+
+        this.colliderOffset = new Vector2(1, 1);
+        this.colliderSize = new Vector2(6, 6);
+
+        this.sprite = new Sprite({
+            position: new Vector2(0, 0),
+            sourceImage: image,
+            frameSize: new Vector2(8, 8),
+            numColumns: 6,
+            numRows: 1,
+            drawFrameIndex: 0
+        });
+        const frame_ms = 100;
+        this.frameIdx = new TimedValue([
+            { ms: frame_ms, value: 0 },
+            { ms: frame_ms, value: 1 },
+            { ms: frame_ms, value: 2 },
+            { ms: frame_ms, value: 3 },
+            { ms: frame_ms, value: 4 },
+            { ms: frame_ms, value: 5 },
+        ]);
+        this.addChild(this.sprite);
+        this.addChild(this.frameIdx);
+    }
+
+    update(deltaTime)
+    {
+        this.updateChildren(deltaTime);
+        this.position.y += this.speed * deltaTime;
+        this.sprite.currFrameIndex = this.frameIdx.value();
+    }
+
+    draw(drawingContext)
+    {
+        this.drawChildren(drawingContext);
+    }
+
+    outOfSight()
+    {
+        return this.position.y > this.fbHeight;
+    }
+
+    collider()
+    {
+        return new Rectangle(
+            new Vector2(
+                this.position.x + this.colliderOffset.x,
+                this.position.y + this.colliderOffset.y
+            ),
+            this.colliderSize.x,
+            this.colliderSize.y
+        );
+    }
+}

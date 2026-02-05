@@ -11,19 +11,11 @@ import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
 import { AudioFile } from './audio_file.js';
+import { Alien } from './alien.js';
 
 class Main extends GameObject
 {
     pressedKeys = new Set();
-
-    onMouseMove = (event) => { this.updateRawMousePosition(event); }
-
-    updateRawMousePosition(event)
-    {
-        this.rawMouseX = event.clientX;
-        this.rawMouseY = event.clientY;
-        this.mousePositionOutdated = true;
-    }
 
     onAssetLoaded = (asset) =>
     {
@@ -56,16 +48,6 @@ class Main extends GameObject
         this.pressedKeys.delete(event.code)
     }
 
-    onMouseDown = (event) =>
-    {
-        if (this.loadingAssets.length > 0)
-        {
-            return;
-        }
-        this.updateRawMousePosition(event);
-        this.mouseDownHandlers.forEach((handler) => { handler(); });
-    }
-
     constructor(mainWindow, jsonParser, scriptElemId)
     {
         super(new Vector2(0, 0), 'Main');
@@ -77,33 +59,31 @@ class Main extends GameObject
         this.canvas = this.window.document.getElementById(scriptElem.getAttribute('canvasId'));
         this.canvasRect = new Rectangle(new Vector2(0, 0), this.canvas.width, this.canvas.height);
         this.settings = new Settings();
+
+        /** @type {Bullet[]} */
         this.bullets = [];
+
+        this.alienBullets = [];
         this.max_num_bullets = 3;
 
-        /* Initialize mouse position tracking */
-        this.mouseDown = false;
-        this.mousePosition = new Vector2(-1, -1);
-        this.mousePositionOutdated = false;
-        this.canvas.addEventListener("mousemove", this.onMouseMove);
-
-        /* Initialize handling of mouse clicks */
-        this.mouseDownHandlers = [];
-        this.canvas.addEventListener("mousedown", this.onMouseDown);
         this.window.addEventListener('keydown', this.onKeyDown);
         this.window.addEventListener('keyup', this.onKeyUp);
 
-        /* Start loading common assets */
         this.loadingAssets = [];
         this.assets = {
             images: {
                 player: new ImageFile(this.window.document, this.rootPath + "/images/player.png", this.onAssetLoaded),
                 bullet: new ImageFile(this.window.document, this.rootPath + "/images/bullet.png", this.onAssetLoaded),
+                alien: new ImageFile(this.window.document, this.rootPath + "/images/alien.png", this.onAssetLoaded),
+                alienBullet: new ImageFile(this.window.document, this.rootPath + "/images/alien_bullet.png", this.onAssetLoaded),
+                explosion: new ImageFile(this.window.document, this.rootPath + "/images/explosion.png", this.onAssetLoaded),
             },
             music: {
                 battle: new AudioFile(this.window.document, this.rootPath + "/music/battle.ogg", this.onAssetLoaded)
             },
             sounds: {
-                player_laser: new AudioFile(this.window.document, this.rootPath + "/sounds/player_laser.wav", this.onAssetLoaded)
+                player_laser: new AudioFile(this.window.document, this.rootPath + "/sounds/player_laser.wav", this.onAssetLoaded),
+                alien_laser: new AudioFile(this.window.document, this.rootPath + "/sounds/alien_laser.wav", this.onAssetLoaded)
             }
         }
         Object.values(this.assets).forEach((category) => {
@@ -130,6 +110,19 @@ class Main extends GameObject
             }
             this.player = new Player(this.canvasRect, this.assets.images.player, this.pressedKeys);
             this.addChild(this.player);
+
+            /** @type {Alien[]} */
+            this.aliens = [];
+            this.aliens.push(new Alien(
+                this.canvasRect, (bullet) => {
+                    this.alienBullets.push(bullet);
+                    this.addChild(bullet);
+                }, this.assets.sounds.alien_laser, this.assets.images.alien,
+                this.assets.images.explosion, this.assets.images.alienBullet
+            ));
+            for (const alien of this.aliens) {
+                this.addChild(alien);
+            }
             this.gameEngine.start();
         }
     }
@@ -141,18 +134,44 @@ class Main extends GameObject
 
     update(deltaTimeMs)
     {
-        /* Update mouse position if necessary */
-        if (this.mousePositionOutdated) {
-            const canvasRect = this.canvas.getBoundingClientRect();
-            this.mousePosition.x = (this.rawMouseX - canvasRect.left) * (this.canvas.width / canvasRect.width);
-            this.mousePosition.y = (this.rawMouseY - canvasRect.top) * (this.canvas.height / canvasRect.height);
-            this.mousePositionOutdated = false;
-        }
         this.updateChildren(deltaTimeMs);
+
+        /* handle interactions of all player bullets */
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             if (this.bullets[i].outOfSight()) {
                 this.removeChild(this.bullets[i]);
                 this.bullets.splice(i, 1);
+            } else {
+                for (const alien of this.aliens) {
+                    if (!alien.vulnerable()) {
+                        continue;
+                    }
+                    if (this.bullets[i].collider().intersectsWith(alien.collider())) {
+                        alien.startExplosion(() => {
+                            this.removeChild(alien);
+                            const idx = this.aliens.findIndex(item => item === alien);
+                            if (idx !== -1) {
+                                this.aliens.splice(idx, 1);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        /* handle interactions of all alien bullets */
+        for (let i = this.alienBullets.length - 1; i >= 0; i--) {
+            const bullet = this.alienBullets[i];
+            if (bullet.outOfSight()) {
+                this.removeChild(bullet);
+                this.alienBullets.splice(i, 1);
+            }
+        }
+        /* handle interactions of all aliens */
+        for (let i = this.aliens.length - 1; i >= 0; i--) {
+            const alien = this.aliens[i];
+            if (alien.finishedManeuver()) {
+                this.removeChild(alien);
+                this.aliens.splice(i, 1);
             }
         }
     }

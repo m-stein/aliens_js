@@ -31,7 +31,10 @@ export class Bullet extends GameObject
     {
         return this.position.y < -this.size.y;
     }
-
+    
+    /**
+     * @returns {Rectangle}
+     */
     collider()
     {
         return new Rectangle(this.position.copy(), this.size.x, this.size.y);

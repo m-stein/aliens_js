@@ -17,6 +17,20 @@ export class Rectangle
                position.y >= this.position.y &&
                position.y < this.position.y + this.height;
     }
+    
+    /**
+     * @param {Rectangle} rect
+     * @returns {boolean}
+     */
+    intersectsWith(otherRect)
+    {
+        return !(
+            this.position.x + this.width  < otherRect.position.x ||
+            this.position.x > otherRect.position.x + otherRect.width ||
+            this.position.y + this.height < otherRect.position.y ||
+            this.position.y > otherRect.position.y + otherRect.height
+        );
+    }
 
     copy()
     {
