@@ -14,7 +14,7 @@ const AlienState = Object.freeze({
 
 export class Alien extends GameObject
 {
-    constructor(envRect, addBulletFn, laserSound, ufoImg, explosionImg, bulletImg)
+    constructor(envRect, addBulletFn, laserSound, explosionSound, ufoImg, explosionImg, bulletImg)
     {
         super(new Vector2(0, 32), "Alien");
 
@@ -37,6 +37,7 @@ export class Alien extends GameObject
         this.colliderOffset = new Vector2(5, 6);
         this.colliderSize = new Vector2(22, 13);
 
+        this.explosionSound = explosionSound;
         this.explosionSprite = new Sprite({
             position: new Vector2(0, 0),
             sourceImage: explosionImg,
@@ -181,6 +182,11 @@ export class Alien extends GameObject
         this.state = AlienState.EXPLODING;
         this.addChild(this.explosionSprite);
         this.addChild(this.explosionFrameIdx);
+
+        const sound = this.explosionSound.htmlElement;
+        sound.pause();
+        sound.currentTime = 0;
+        sound.play();
     }
 
     vulnerable()

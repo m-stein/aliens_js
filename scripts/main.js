@@ -83,7 +83,8 @@ class Main extends GameObject
             },
             sounds: {
                 player_laser: new AudioFile(this.window.document, this.rootPath + "/sounds/player_laser.wav", this.onAssetLoaded),
-                alien_laser: new AudioFile(this.window.document, this.rootPath + "/sounds/alien_laser.wav", this.onAssetLoaded)
+                alien_laser: new AudioFile(this.window.document, this.rootPath + "/sounds/alien_laser.wav", this.onAssetLoaded),
+                alien_explosion: new AudioFile(this.window.document, this.rootPath + "/sounds/alien_explosion.wav", this.onAssetLoaded),
             }
         }
         Object.values(this.assets).forEach((category) => {
@@ -114,11 +115,16 @@ class Main extends GameObject
             /** @type {Alien[]} */
             this.aliens = [];
             this.aliens.push(new Alien(
-                this.canvasRect, (bullet) => {
+                this.canvasRect,
+                (bullet) => {
                     this.alienBullets.push(bullet);
                     this.addChild(bullet);
-                }, this.assets.sounds.alien_laser, this.assets.images.alien,
-                this.assets.images.explosion, this.assets.images.alienBullet
+                },
+                this.assets.sounds.alien_laser,
+                this.assets.sounds.alien_explosion,
+                this.assets.images.alien,
+                this.assets.images.explosion,
+                this.assets.images.alienBullet
             ));
             for (const alien of this.aliens) {
                 this.addChild(alien);

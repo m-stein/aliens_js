@@ -1,0 +1,8 @@
+Open issues
+===========
+
+#1 Add animation tool that is a wrapper for Sprite and TimedValue in order to reduce redundancy
+
+#2 Enable alien bullets to hit the player
+
+#3 Enable alien ships to hit the player
