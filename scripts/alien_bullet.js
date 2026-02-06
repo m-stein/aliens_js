@@ -1,13 +1,12 @@
-import { GameObject } from "./game_object.js";
-import { Sprite } from "./sprite.js";
-import { TimedValue } from "./timed_value.js";
-import { Vector2 } from "./vector_2.js";
+import { GameObject } from './game_object.js';
+import { Rectangle } from './rectangle.js';
+import { Sprite } from './sprite.js';
+import { TimedValue } from './timed_value.js';
+import { Vector2 } from './vector_2.js';
 
-export class AlienBullet extends GameObject
-{
-    constructor(rifleTip, fbHeight, image)
-    {
-        super(rifleTip.copy(), "AlienBullet");
+export class AlienBullet extends GameObject {
+    constructor(rifleTip, fbHeight, image) {
+        super(rifleTip.copy(), 'AlienBullet');
         this.width = 8;
         this.height = 8;
         this.fbHeight = fbHeight;
@@ -28,40 +27,36 @@ export class AlienBullet extends GameObject
             frameSize: new Vector2(8, 8),
             numColumns: 6,
             numRows: 1,
-            drawFrameIndex: 0
+            drawFrameIndex: 0,
         });
-        const frame_ms = 100;
+        const frameMs = 100;
         this.frameIdx = new TimedValue([
-            { ms: frame_ms, value: 0 },
-            { ms: frame_ms, value: 1 },
-            { ms: frame_ms, value: 2 },
-            { ms: frame_ms, value: 3 },
-            { ms: frame_ms, value: 4 },
-            { ms: frame_ms, value: 5 },
+            { ms: frameMs, value: 0 },
+            { ms: frameMs, value: 1 },
+            { ms: frameMs, value: 2 },
+            { ms: frameMs, value: 3 },
+            { ms: frameMs, value: 4 },
+            { ms: frameMs, value: 5 },
         ]);
         this.addChild(this.sprite);
         this.addChild(this.frameIdx);
     }
 
-    update(deltaTime)
-    {
+    update(deltaTime) {
         this.updateChildren(deltaTime);
         this.position.y += this.speed * deltaTime;
         this.sprite.currFrameIndex = this.frameIdx.value();
     }
 
-    draw(drawingContext)
-    {
+    draw(drawingContext) {
         this.drawChildren(drawingContext);
     }
 
-    outOfSight()
-    {
+    outOfSight() {
         return this.position.y > this.fbHeight;
     }
 
-    collider()
-    {
+    collider() {
         return new Rectangle(
             new Vector2(
                 this.position.x + this.colliderOffset.x,

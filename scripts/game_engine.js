@@ -1,9 +1,7 @@
-import { DrawingContext } from "./drawing_context.js";
+import { DrawingContext } from './drawing_context.js';
 
-export class GameEngine
-{
-    constructor({rootGameObj, camera, canvas, updatePeriodMs})
-    {
+export class GameEngine {
+    constructor({ rootGameObj, camera, canvas, updatePeriodMs }) {
         this.drawingContext = new DrawingContext(canvas);
         this.lastUpdateTime = 0;
         this.accumulatedTime = 0;
@@ -14,12 +12,10 @@ export class GameEngine
         this.started = false;
     }
 
-    update = (time) =>
-    {
-        if (!this.started)
-            return;
+    update = (time) => {
+        if (!this.started) return;
 
-        this.accumulatedTime += (time - this.lastUpdateTime);
+        this.accumulatedTime += time - this.lastUpdateTime;
         this.lastUpdateTime = time;
         let rootGameObjUpdated = false;
         while (this.accumulatedTime >= this.gameUpdatePeriodMs) {
@@ -28,39 +24,41 @@ export class GameEngine
             rootGameObjUpdated = true;
         }
         if (rootGameObjUpdated) {
-            this.drawingContext.canvasContext.clearRect(0, 0, this.drawingContext.canvas.width, this.drawingContext.canvas.height);
+            this.drawingContext.canvasContext.clearRect(
+                0,
+                0,
+                this.drawingContext.canvas.width,
+                this.drawingContext.canvas.height
+            );
             this.drawingContext.canvasContext.save();
-            this.drawingContext.canvasContext.translate(-this.camera.position.x, -this.camera.position.y);
+            this.drawingContext.canvasContext.translate(
+                -this.camera.position.x,
+                -this.camera.position.y
+            );
             this.rootGameObj.draw(this.drawingContext, 0);
             this.drawingContext.canvasContext.restore();
         }
         this.requestUpdate();
-    }
+    };
 
-    requestUpdate()
-    {
+    requestUpdate() {
         this.updateCallbackId = requestAnimationFrame(this.update);
     }
 
-    cancelUpdate()
-    {
+    cancelUpdate() {
         cancelAnimationFrame(this.updateCallbackId);
     }
 
-    start()
-    {
-        if (this.started)
-            return;
+    start() {
+        if (this.started) return;
 
         this.started = true;
         this.requestUpdate();
     }
 
-    stop()
-    {
-        if (!this.started)
-            return;
-        
+    stop() {
+        if (!this.started) return;
+
         this.started = false;
         this.cancelUpdate();
     }

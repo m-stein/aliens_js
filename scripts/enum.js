@@ -1,18 +1,14 @@
-export function createEnum(baseEnum)
-{
-    return new Proxy(baseEnum,
-    {
-        get(target, name)
-        {
-            if (!baseEnum.hasOwnProperty(name)) {
-                throw new Error(`"${name}" value does not exist in the enum`)
+export function createEnum(baseEnum) {
+    return new Proxy(baseEnum, {
+        get(target, name) {
+            if (!Object.prototype.hasOwnProperty.call(baseEnum, name)) {
+                throw new Error(`'${name}' value does not exist in the enum`);
             }
-            return baseEnum[name]
+            return target[name];
         },
-        
-        set(target, name, value)
-        {
-            throw new Error('Cannot add a new value to the enum')
-        }
-    })
+
+        set(_target, _name, _value) {
+            throw new Error('Cannot add a new value to the enum');
+        },
+    });
 }

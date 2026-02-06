@@ -1,4 +1,5 @@
-export class Settings
-{
-    keyShoot() { return "Space" }
+export class Settings {
+    keyShoot() {
+        return 'Space';
+    }
 }

@@ -1,14 +1,15 @@
-import { GameObject } from "./game_object.js";
-import { Rectangle } from "./rectangle.js";
-import { Sprite } from "./sprite.js";
-import { Vector2 } from "./vector_2.js";
+import { GameObject } from './game_object.js';
+import { Rectangle } from './rectangle.js';
+import { Sprite } from './sprite.js';
+import { Vector2 } from './vector_2.js';
 
-export class Bullet extends GameObject
-{
-    constructor(rifleTip, image)
-    {
+export class Bullet extends GameObject {
+    constructor(rifleTip, image) {
         let size = new Vector2(3, 7);
-        super(new Vector2(rifleTip.x - size.x / 2, rifleTip.y - size.y), "Bullet");
+        super(
+            new Vector2(rifleTip.x - size.x / 2, rifleTip.y - size.y),
+            'Bullet'
+        );
         this.sprite = new Sprite({ sourceImage: image });
         this.size = size;
         this.speed = 600.0 / 1000;
@@ -16,27 +17,23 @@ export class Bullet extends GameObject
         this.addChild(this.sprite);
     }
 
-    update(deltaTime)
-    {
+    update(deltaTime) {
         this.position.y -= this.speed * deltaTime;
         this.updateChildren(deltaTime);
     }
 
-    draw(drawingContext)
-    {
-        this.drawChildren(drawingContext)
+    draw(drawingContext) {
+        this.drawChildren(drawingContext);
     }
 
-    outOfSight()
-    {
+    outOfSight() {
         return this.position.y < -this.size.y;
     }
-    
+
     /**
      * @returns {Rectangle}
      */
-    collider()
-    {
+    collider() {
         return new Rectangle(this.position.copy(), this.size.x, this.size.y);
     }
 }

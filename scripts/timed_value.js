@@ -1,29 +1,23 @@
-import { randomInt } from "./math.js";
+import { randomInt } from './math.js';
 
-export class TimedValue
-{
-    constructor(phases)
-    {
+export class TimedValue {
+    constructor(phases) {
         this.phases = phases;
         this.startPhase(0);
     }
 
-    startPhase(phaseIdx)
-    {
+    startPhase(phaseIdx) {
         this.phaseIdx = phaseIdx;
         this.remainingTimeMs = this.phases[phaseIdx].ms;
     }
-    
-    startPhaseWithRandomTimeOffset(phaseIdx)
-    {
+
+    startPhaseWithRandomTimeOffset(phaseIdx) {
         this.phaseIdx = phaseIdx;
         this.remainingTimeMs = randomInt(0, this.phases[phaseIdx].ms);
     }
 
-    update(deltaTimeMs)
-    {
-        if (this.remainingTimeMs === undefined)
-            return;
+    update(deltaTimeMs) {
+        if (this.remainingTimeMs === undefined) return;
 
         while (this.remainingTimeMs <= deltaTimeMs) {
             deltaTimeMs -= this.remainingTimeMs;
@@ -32,7 +26,9 @@ export class TimedValue
         this.remainingTimeMs -= deltaTimeMs;
     }
 
-    value() { return this.phases[this.phaseIdx].value; }
-    
-    draw(drawingContext) { }
+    value() {
+        return this.phases[this.phaseIdx].value;
+    }
+
+    draw(_drawingContext) {}
 }

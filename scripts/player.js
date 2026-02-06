@@ -2,11 +2,10 @@ import { GameObject } from './game_object.js';
 import { Vector2 } from './vector_2.js';
 import { Rectangle } from './rectangle.js';
 import { Sprite } from './sprite.js';
-import { TimedValue } from "./timed_value.js";
+import { TimedValue } from './timed_value.js';
 
-export class Player extends GameObject
-{
-    constructor(fb_rect, image, pressed_keys) {
+export class Player extends GameObject {
+    constructor(fbRect, image, pressedKeys) {
         super(new Vector2(200, 250), 'Player');
         this.sprite = new Sprite({
             position: new Vector2(0, 0),
@@ -16,16 +15,18 @@ export class Player extends GameObject
             numRows: 1,
             drawFrameIndex: 0,
         });
-        this.rifle_tip_offset = new Vector2(15.5, 4);
-        this.fb_rect = fb_rect
-        this.pressed_keys = pressed_keys
-        this.speed = 300 / 1000
-        this.collider_offset = new Vector2(10, 7)
-        this.collider_size = new Vector2(11, 17)
-        this.min_y = this.fb_rect.height - 100 - this.collider_offset.y
-        this.max_y = this.fb_rect.height - this.collider_offset.y - this.collider_size.y
-        this.min_x = -this.collider_offset.x
-        this.max_x = this.fb_rect.width - this.collider_offset.x - this.collider_size.x
+        this.rifleTipOffset = new Vector2(15.5, 4);
+        this.fbRect = fbRect;
+        this.pressedKeys = pressedKeys;
+        this.speed = 300 / 1000;
+        this.colliderOffset = new Vector2(10, 7);
+        this.colliderSize = new Vector2(11, 17);
+        this.minY = this.fbRect.height - 100 - this.colliderOffset.y;
+        this.maxY =
+            this.fbRect.height - this.colliderOffset.y - this.colliderSize.y;
+        this.minX = -this.colliderOffset.x;
+        this.maxX =
+            this.fbRect.width - this.colliderOffset.x - this.colliderSize.x;
         this.frameIdx = new TimedValue([
             { ms: 100, value: 0 },
             { ms: 100, value: 1 },
@@ -34,16 +35,14 @@ export class Player extends GameObject
         this.addChild(this.sprite);
     }
 
-    rifle_tip()
-    {
+    rifleTip() {
         return new Vector2(
-            this.position.x + this.rifle_tip_offset.x,
-            this.position.y + this.rifle_tip_offset.y
+            this.position.x + this.rifleTipOffset.x,
+            this.position.y + this.rifleTipOffset.y
         );
     }
 
-    ready_to_shoot()
-    {
+    readyToShoot() {
         return true;
     }
 
@@ -51,50 +50,52 @@ export class Player extends GameObject
         this.drawChildren(drawingContext);
     }
 
-    update(delta_time) {
-        this.updateChildren(delta_time);
-        this._update_position(delta_time)
+    update(deltaTime) {
+        this.updateChildren(deltaTime);
+        this._updatePosition(deltaTime);
         this.sprite.currFrameIndex = this.frameIdx.value();
     }
 
-    _update_position(delta_time) {
-        let direction = new Vector2(0, 0)
-        if (this.pressed_keys.has("KeyA")) {
-            direction.x -= 1
+    _updatePosition(deltaTimeMs) {
+        let direction = new Vector2(0, 0);
+        if (this.pressedKeys.has('KeyA')) {
+            direction.x -= 1;
         }
-        if (this.pressed_keys.has("KeyD")) {
-            direction.x += 1
+        if (this.pressedKeys.has('KeyD')) {
+            direction.x += 1;
         }
-        if (this.pressed_keys.has("KeyW")) {
-            direction.y -= 1
+        if (this.pressedKeys.has('KeyW')) {
+            direction.y -= 1;
         }
-        if (this.pressed_keys.has("KeyS")) {
-            direction.y += 1
+        if (this.pressedKeys.has('KeyS')) {
+            direction.y += 1;
         }
         if (direction.length() > 0) {
-            let diff = direction.normalized().scale(this.speed * delta_time);
+            let diff = direction.normalized().scale(this.speed * deltaTimeMs);
             this.position.add(diff);
-            if (this.position.x < this.min_x) {
-                this.position.x = this.min_x
+            if (this.position.x < this.minX) {
+                this.position.x = this.minX;
             }
-            if (this.position.x > this.max_x) {
-                this.position.x = this.max_x
+            if (this.position.x > this.maxX) {
+                this.position.x = this.maxX;
             }
-            if (this.position.y < this.min_y) {
-                this.position.y = this.min_y
+            if (this.position.y < this.minY) {
+                this.position.y = this.minY;
             }
-            if (this.position.y > this.max_y) {
-                this.position.y = this.max_y
+            if (this.position.y > this.maxY) {
+                this.position.y = this.maxY;
             }
         }
     }
 
     collider() {
-        return Rectangle(
+        return new Rectangle(
             new Vector2(
-                this.position.x + this.collider_offset.x,
-                this.position.y + this.collider_offset.y),
-            this.collider_size.x,
-            this.collider_size.y)
+                this.position.x + this.colliderOffset.x,
+                this.position.y + this.colliderOffset.y
+            ),
+            this.colliderSize.x,
+            this.colliderSize.y
+        );
     }
 }
