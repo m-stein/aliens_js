@@ -3,10 +3,18 @@ import { Vector2 } from './vector_2.js';
 import { Rectangle } from './rectangle.js';
 import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
+import { createEnum } from './enum.js';
+import { Timeout } from './timeout.js';
 
 export class Player extends GameObject {
+    static State = createEnum({
+        Alive: 0,
+        Respawning: 1,
+    });
+
     constructor(fbRect, image, pressedKeys) {
-        super(new Vector2(200, 250), 'Player');
+        super(new Vector2(fbRect.width / 2 - 16, fbRect.height - 32), 'Player');
+        this.state = Player.State.Alive;
         this.sprite = new Sprite({
             position: new Vector2(0, 0),
             sourceImage: image,
@@ -31,6 +39,16 @@ export class Player extends GameObject {
             { ms: 100, value: 0 },
             { ms: 100, value: 1 },
         ]);
+        this.respawnVisibility = new TimedValue([
+            { ms: 150, value: true },
+            { ms: 150, value: false },
+        ]);
+        this.respawnTimeout = new Timeout(2000, () => {
+            this.state = Player.State.Alive;
+            this.removeChild(this.respawnTimeout);
+            this.removeChild(this.respawnVisibility);
+        });
+        this.respawnAt = this.position.copy();
         this.addChild(this.frameIdx);
         this.addChild(this.sprite);
     }
@@ -43,10 +61,16 @@ export class Player extends GameObject {
     }
 
     readyToShoot() {
-        return true;
+        return this.state == Player.State.Alive;
     }
 
     draw(drawingContext) {
+        if (
+            this.state == Player.State.Respawning &&
+            !this.respawnVisibility.value()
+        ) {
+            return;
+        }
         this.drawChildren(drawingContext);
     }
 
@@ -54,6 +78,22 @@ export class Player extends GameObject {
         this.updateChildren(deltaTime);
         this._updatePosition(deltaTime);
         this.sprite.currFrameIndex = this.frameIdx.value();
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    vulnerable() {
+        return this.state == Player.State.Alive;
+    }
+
+    respawn() {
+        this.state = Player.State.Respawning;
+        this.respawnVisibility.startPhase(0);
+        this.respawnTimeout.reset();
+        this.position = this.respawnAt.copy();
+        this.addChild(this.respawnTimeout);
+        this.addChild(this.respawnVisibility);
     }
 
     _updatePosition(deltaTimeMs) {

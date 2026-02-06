@@ -122,6 +122,11 @@ class Main extends GameObject {
                     this.rootPath + '/sounds/player_laser.wav',
                     this.onAssetLoaded
                 ),
+                playerExplosion: new AudioFile(
+                    this.window.document,
+                    this.rootPath + '/sounds/player_explosion.wav',
+                    this.onAssetLoaded
+                ),
                 alienLaser: new AudioFile(
                     this.window.document,
                     this.rootPath + '/sounds/alien_laser.wav',
@@ -174,6 +179,8 @@ class Main extends GameObject {
             for (const layer of this.starsLayers) {
                 this.addChild(layer);
             }
+
+            /** @type {Player} */
             this.player = new Player(
                 this.canvasRect,
                 this.assets.images.player,
@@ -209,28 +216,21 @@ class Main extends GameObject {
 
         /* handle interactions of all player bullets */
         for (let idx = this.playerBullets.length - 1; idx >= 0; idx--) {
-            if (this.playerBullets[idx].outOfSight()) {
-                this.removeChild(this.playerBullets[idx]);
+            const bullet = this.playerBullets[idx];
+            if (bullet.outOfSight()) {
+                this.removeChild(bullet);
                 this.playerBullets.splice(idx, 1);
             } else {
                 for (const alien of this.aliens) {
                     if (!alien.vulnerable()) {
                         continue;
                     }
-                    if (
-                        this.playerBullets[idx]
-                            .collider()
-                            .intersectsWith(alien.collider())
-                    ) {
-                        alien.startExplosion(() => {
-                            this.removeChild(alien);
-                            const idx = this.aliens.findIndex(
-                                (item) => item === alien
-                            );
-                            if (idx !== -1) {
-                                this.aliens.splice(idx, 1);
-                            }
+                    if (bullet.collider().intersectsWith(alien.collider())) {
+                        alien.startExplosion((alienArg) => {
+                            alienArg.respawn();
                         });
+                        this.removeChild(bullet);
+                        this.playerBullets.splice(idx, 1);
                     }
                 }
             }
@@ -241,14 +241,39 @@ class Main extends GameObject {
             if (bullet.outOfSight()) {
                 this.removeChild(bullet);
                 this.alienBullets.splice(idx, 1);
+            } else {
+                if (!this.player.vulnerable()) {
+                    continue;
+                }
+                if (bullet.collider().intersectsWith(this.player.collider())) {
+                    this.player.respawn();
+                    this.removeChild(bullet);
+                    this.alienBullets.splice(idx, 1);
+                    const sound =
+                        this.assets.sounds.playerExplosion.htmlElement;
+                    sound.pause();
+                    sound.currentTime = 0;
+                    sound.play();
+                }
             }
         }
         /* handle interactions of all aliens */
         for (let idx = this.aliens.length - 1; idx >= 0; idx--) {
             const alien = this.aliens[idx];
             if (alien.finishedManeuver()) {
-                this.removeChild(alien);
-                this.aliens.splice(idx, 1);
+                alien.respawn();
+            } else {
+                if (!this.player.vulnerable()) {
+                    continue;
+                }
+                if (alien.collider().intersectsWith(this.player.collider())) {
+                    this.player.respawn();
+                    const sound =
+                        this.assets.sounds.playerExplosion.htmlElement;
+                    sound.pause();
+                    sound.currentTime = 0;
+                    sound.play();
+                }
             }
         }
     }

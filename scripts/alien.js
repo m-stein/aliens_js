@@ -4,14 +4,16 @@ import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
 import { Rectangle } from './rectangle.js';
 import { AlienBullet } from './alien_bullet.js';
-
-const AlienState = Object.freeze({
-    ALIVE: 0,
-    EXPLODING: 1,
-    DESTROYED: 2,
-});
+import { createEnum } from './enum.js';
 
 export class Alien extends GameObject {
+    static State = createEnum({
+        Alive: 0,
+        Exploding1: 1,
+        Exploding2: 2,
+        Destroyed: 3,
+    });
+
     constructor(
         envRect,
         addBulletFn,
@@ -21,7 +23,7 @@ export class Alien extends GameObject {
         explosionImg,
         bulletImg
     ) {
-        super(new Vector2(0, 32), 'Alien');
+        super(new Vector2(0, 0), 'Alien');
 
         this.ufoSprite = new Sprite({
             position: new Vector2(0, 0),
@@ -38,13 +40,13 @@ export class Alien extends GameObject {
         ]);
         this.envRect = envRect;
 
-        this.state = AlienState.ALIVE;
+        this.state = Alien.State;
         this.colliderOffset = new Vector2(5, 6);
         this.colliderSize = new Vector2(22, 13);
 
         this.explosionSound = explosionSound;
         this.explosionSprite = new Sprite({
-            position: new Vector2(0, 0),
+            position: new Vector2(1, 0),
             sourceImage: explosionImg,
             frameSize: new Vector2(32, 32),
             numColumns: 21,
@@ -77,65 +79,111 @@ export class Alien extends GameObject {
         ]);
 
         this.bulletImg = bulletImg;
-        this.laserSfx = laserSound;
-        this.ySpeed = Alien._randomUniform(20.0, 60.0) / 1000;
-        this.curveFreqFactor = 1 / (this.ySpeed * 1000);
+        this.laserSound = laserSound;
 
         this.maxCurveAmplFactor =
             this.envRect.width / 2 - this.ufoSprite.frameSize.x / 2;
+
+        this.curveHorizontalShift =
+            -this.ufoSprite.frameSize.x / 2 + this.envRect.width / 2;
+
+        this.addBulletFn = addBulletFn;
+        this.state = Alien.State.Alive;
+        this.respawn();
+        this.addChild(this.ufoFrameIdx);
+        this.addChild(this.ufoSprite);
+    }
+
+    respawn() {
+        this.fireTimeout = Alien._newFireTimeout();
+        this.ySpeed = Alien._randomUniform(20.0, 60.0) / 1000;
+        this.curveFreqFactor = 1 / (this.ySpeed * 1000);
+        this.curveVerticalShift = Alien._randomUniform(0, 360);
         this.curveAmplFactor = Alien._randomUniform(
             this.maxCurveAmplFactor / 2,
             this.maxCurveAmplFactor
         );
+        this.position = new Vector2(0, -32);
+        this._updatePosition(0);
+        switch (this.state) {
+            case Alien.State.Alive:
+                break;
 
-        this.curveHorizontalShift =
-            -this.ufoSprite.frameSize.x / 2 + this.envRect.width / 2;
-        this.curveVerticalShift = Alien._randomUniform(0, 360);
+            case Alien.State.Exploding1:
+                this.removeChild(this.explosionSprite);
+                this.removeChild(this.explosionFrameIdx);
+                this.state = Alien.State.Alive;
+                break;
 
-        this.fireTimeout = Alien._newFireTimeout();
-        this.addBulletFn = addBulletFn;
+            case Alien.State.Exploding2:
+                this.removeChild(this.explosionSprite);
+                this.removeChild(this.explosionFrameIdx);
+                this.addChild(this.ufoFrameIdx);
+                this.addChild(this.ufoSprite);
+                this.state = Alien.State.Alive;
+                break;
 
-        this.addChild(this.ufoFrameIdx);
-        this.addChild(this.ufoSprite);
+            case Alien.State.Destroyed:
+                this.addChild(this.ufoFrameIdx);
+                this.addChild(this.ufoSprite);
+                this.state = Alien.State.Alive;
+                break;
+        }
     }
+
     draw(drawingContext) {
         this.drawChildren(drawingContext);
     }
 
-    update(deltaTime) {
-        this.updateChildren(deltaTime);
+    _updatePosition(deltaMs) {
+        this.position.y = this.position.y + this.ySpeed * deltaMs;
+        this.position.x =
+            this.curveAmplFactor *
+                Math.sin(
+                    (this.position.y - this.curveVerticalShift) *
+                        this.curveFreqFactor
+                ) +
+            this.curveHorizontalShift;
+    }
+
+    update(deltaMs) {
+        this.updateChildren(deltaMs);
         switch (this.state) {
-            case AlienState.ALIVE:
+            case Alien.State.Alive:
                 this.ufoSprite.currFrameIndex = this.ufoFrameIdx.value();
-                if (this.fireTimeout > deltaTime) {
-                    this.fireTimeout -= deltaTime;
+                if (this.fireTimeout > deltaMs) {
+                    this.fireTimeout -= deltaMs;
                 } else {
                     this._fireBullet();
                     this.fireTimeout = Alien._newFireTimeout();
                 }
-                this.position.y = this.position.y + this.ySpeed * deltaTime;
-                this.position.x =
-                    this.curveAmplFactor *
-                        Math.sin(
-                            (this.position.y - this.curveVerticalShift) *
-                                this.curveFreqFactor
-                        ) +
-                    this.curveHorizontalShift;
+                this._updatePosition(deltaMs);
                 break;
 
-            case AlienState.EXPLODING:
+            case Alien.State.Exploding1:
                 this.explosionSprite.currFrameIndex =
                     this.explosionFrameIdx.value();
-                if (this.explosionFrameIdx.value() == 20) {
-                    this.explosionFinishedFn();
-                }
-                if (this.ufoSprite !== null) {
+                if (this.explosionFrameIdx.value() < 10) {
                     this.ufoSprite.currFrameIndex = this.ufoFrameIdx.value();
-                    if (this.explosionFrameIdx.value() >= 10) {
-                        this.removeChild(this.ufoSprite);
-                        this.ufoSprite = null;
-                    }
+                } else {
+                    this.removeChild(this.ufoSprite);
+                    this.removeChild(this.ufoFrameIdx);
+                    this.state = Alien.State.Exploding2;
                 }
+                break;
+
+            case Alien.State.Exploding2:
+                this.explosionSprite.currFrameIndex =
+                    this.explosionFrameIdx.value();
+                if (this.explosionFrameIdx.value() >= 20) {
+                    this.removeChild(this.explosionSprite);
+                    this.removeChild(this.explosionFrameIdx);
+                    this.state = Alien.State.Destroyed;
+                    this.explosionFinishedFn(this);
+                }
+                break;
+
+            case Alien.State.Destroyed:
                 break;
         }
     }
@@ -158,7 +206,7 @@ export class Alien extends GameObject {
         this.addBulletFn(
             new AlienBullet(midBottom, this.envRect.height, this.bulletImg)
         );
-        const sound = this.laserSfx.htmlElement;
+        const sound = this.laserSound.htmlElement;
         sound.pause();
         sound.currentTime = 0;
         sound.play();
@@ -184,7 +232,8 @@ export class Alien extends GameObject {
      */
     startExplosion(finishedFn) {
         this.explosionFinishedFn = finishedFn;
-        this.state = AlienState.EXPLODING;
+        this.state = Alien.State.Exploding1;
+        this.explosionFrameIdx.startPhase(0);
         this.addChild(this.explosionSprite);
         this.addChild(this.explosionFrameIdx);
 
@@ -195,10 +244,6 @@ export class Alien extends GameObject {
     }
 
     vulnerable() {
-        return this.state === AlienState.ALIVE;
-    }
-
-    destroyed() {
-        return this.state === AlienState.DESTROYED;
+        return this.state === Alien.State.Alive;
     }
 }
