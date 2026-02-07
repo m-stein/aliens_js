@@ -36,9 +36,9 @@ export class GameObject {
         this.children.length = 0;
     }
 
-    updateChildren(deltaTimeMs, level) {
+    updateChildren(elapsedMs, level) {
         this.children.forEach((child) => {
-            child.update(deltaTimeMs, level + 1);
+            child.update(elapsedMs, level + 1);
         });
     }
 

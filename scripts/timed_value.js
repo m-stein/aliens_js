@@ -16,14 +16,14 @@ export class TimedValue {
         this.remainingTimeMs = randomInt(0, this.phases[phaseIdx].ms);
     }
 
-    update(deltaTimeMs) {
+    update(elapsedMs) {
         if (this.remainingTimeMs === undefined) return;
 
-        while (this.remainingTimeMs <= deltaTimeMs) {
-            deltaTimeMs -= this.remainingTimeMs;
+        while (this.remainingTimeMs <= elapsedMs) {
+            elapsedMs -= this.remainingTimeMs;
             this.startPhase((this.phaseIdx + 1) % this.phases.length);
         }
-        this.remainingTimeMs -= deltaTimeMs;
+        this.remainingTimeMs -= elapsedMs;
     }
 
     value() {

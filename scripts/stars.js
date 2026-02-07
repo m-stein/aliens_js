@@ -44,7 +44,7 @@ export class Stars extends GameObject {
         ctx.drawImage(this.localDrawCtx.canvas, 0, y - this.height);
     }
 
-    update(deltaTimeMs) {
-        this.yOffset = (this.yOffset + deltaTimeMs * this.speed) % this.height;
+    update(elapsedMs) {
+        this.yOffset = (this.yOffset + elapsedMs * this.speed) % this.height;
     }
 }

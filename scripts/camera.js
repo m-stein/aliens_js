@@ -15,8 +15,8 @@ export class Camera extends GameObject {
         }
     }
 
-    update(deltaTimeMs) {
-        this.updateChildren(deltaTimeMs);
+    update(elapsedMs) {
+        this.updateChildren(elapsedMs);
     }
 
     draw(drawingContext) {

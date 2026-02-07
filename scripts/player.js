@@ -81,9 +81,9 @@ export class Player extends GameObject {
         this.drawChildren(drawingContext);
     }
 
-    update(deltaTime) {
-        this.updateChildren(deltaTime);
-        this._updatePosition(deltaTime);
+    update(elapsedMs) {
+        this.updateChildren(elapsedMs);
+        this._updatePosition(elapsedMs);
         this.sprite.currFrameIndex = this.frameIdx.value();
     }
 
@@ -103,7 +103,7 @@ export class Player extends GameObject {
         this.addChild(this.respawnVisibility);
     }
 
-    _updatePosition(deltaTimeMs) {
+    _updatePosition(elapsedMs) {
         let direction = new Vector2(0, 0);
         if (this.pressedKeys.has('KeyA')) {
             direction.x -= 1;
@@ -118,7 +118,7 @@ export class Player extends GameObject {
             direction.y += 1;
         }
         if (direction.length() > 0) {
-            let diff = direction.normalized().scale(this.speed * deltaTimeMs);
+            let diff = direction.normalized().scale(this.speed * elapsedMs);
             this.position.add(diff);
             if (this.position.x < this.minX) {
                 this.position.x = this.minX;

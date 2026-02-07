@@ -42,9 +42,9 @@ export class AlienBullet extends GameObject {
         this.addChild(this.frameIdx);
     }
 
-    update(deltaTime) {
-        this.updateChildren(deltaTime);
-        this.position.y += this.speed * deltaTime;
+    update(elapsedMs) {
+        this.updateChildren(elapsedMs);
+        this.position.y += this.speed * elapsedMs;
         this.sprite.currFrameIndex = this.frameIdx.value();
     }
 

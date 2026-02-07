@@ -135,8 +135,8 @@ export class Alien extends GameObject {
         this.drawChildren(drawingContext);
     }
 
-    _updatePosition(deltaMs) {
-        this.position.y = this.position.y + this.ySpeed * deltaMs;
+    _updatePosition(elapsedMs) {
+        this.position.y = this.position.y + this.ySpeed * elapsedMs;
         this.position.x =
             this.curveAmplFactor *
                 Math.sin(
@@ -146,18 +146,18 @@ export class Alien extends GameObject {
             this.curveHorizontalShift;
     }
 
-    update(deltaMs) {
-        this.updateChildren(deltaMs);
+    update(elapsedMs) {
+        this.updateChildren(elapsedMs);
         switch (this.state) {
             case Alien.State.Alive:
                 this.ufoSprite.currFrameIndex = this.ufoFrameIdx.value();
-                if (this.fireTimeout > deltaMs) {
-                    this.fireTimeout -= deltaMs;
+                if (this.fireTimeout > elapsedMs) {
+                    this.fireTimeout -= elapsedMs;
                 } else {
                     this._fireBullet();
                     this.fireTimeout = Alien._newFireTimeout();
                 }
-                this._updatePosition(deltaMs);
+                this._updatePosition(elapsedMs);
                 break;
 
             case Alien.State.Exploding1:

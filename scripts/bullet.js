@@ -17,9 +17,9 @@ export class Bullet extends GameObject {
         this.addChild(this.sprite);
     }
 
-    update(deltaTime) {
-        this.position.y -= this.speed * deltaTime;
-        this.updateChildren(deltaTime);
+    update(elapsedMs) {
+        this.position.y -= this.speed * elapsedMs;
+        this.updateChildren(elapsedMs);
     }
 
     draw(drawingContext) {

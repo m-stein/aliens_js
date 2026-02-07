@@ -211,8 +211,8 @@ class Main extends GameObject {
         };
     }
 
-    update(deltaTimeMs) {
-        this.updateChildren(deltaTimeMs);
+    update(elapsedMs) {
+        this.updateChildren(elapsedMs);
 
         /* handle interactions of all player bullets */
         for (let idx = this.playerBullets.length - 1; idx >= 0; idx--) {
