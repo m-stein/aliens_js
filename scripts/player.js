@@ -12,6 +12,8 @@ export class Player extends GameObject {
         Respawning: 1,
     });
 
+    static RESPAWN_TIMEOUT_MS = 2000;
+
     constructor(fbRect, image, pressedKeys) {
         super(new Vector2(fbRect.width / 2 - 16, fbRect.height - 32), 'Player');
         this.state = Player.State.Alive;
@@ -43,15 +45,20 @@ export class Player extends GameObject {
             { ms: 150, value: true },
             { ms: 150, value: false },
         ]);
-        this.respawnTimeout = new Timeout(2000, () => {
-            this.state = Player.State.Alive;
-            this.removeChild(this.respawnTimeout);
-            this.removeChild(this.respawnVisibility);
-        });
+        this.respawnTimeout = new Timeout(
+            Player.RESPAWN_TIMEOUT_MS,
+            this.finishRespawning
+        );
         this.respawnAt = this.position.copy();
         this.addChild(this.frameIdx);
         this.addChild(this.sprite);
     }
+
+    finishRespawning = () => {
+        this.state = Player.State.Alive;
+        this.removeChild(this.respawnTimeout);
+        this.removeChild(this.respawnVisibility);
+    };
 
     rifleTip() {
         return new Vector2(
@@ -90,7 +97,7 @@ export class Player extends GameObject {
     respawn() {
         this.state = Player.State.Respawning;
         this.respawnVisibility.startPhase(0);
-        this.respawnTimeout.reset();
+        this.respawnTimeout.set(Player.RESPAWN_TIMEOUT_MS);
         this.position = this.respawnAt.copy();
         this.addChild(this.respawnTimeout);
         this.addChild(this.respawnVisibility);
