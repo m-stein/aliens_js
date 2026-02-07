@@ -13,6 +13,11 @@ import { Bullet } from './bullet.js';
 import { AudioFile } from './audio_file.js';
 import { Alien } from './alien.js';
 import { Timeout } from './timeout.js';
+import { SpriteFont } from './sprite_font.js';
+import { Char } from './char.js';
+
+const FONT_LINE_HEIGHT = 11;
+const SCORE_BOARD_COLOR = 'rgb(0,0,0)';
 
 class Main extends GameObject {
     pressedKeys = new Set();
@@ -68,7 +73,7 @@ class Main extends GameObject {
         this.canvasRect = new Rectangle(
             new Vector2(0, 0),
             this.canvas.width,
-            this.canvas.height
+            this.canvas.height - FONT_LINE_HEIGHT
         );
         this.settings = new Settings();
 
@@ -107,6 +112,11 @@ class Main extends GameObject {
                 explosion: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/explosion.png',
+                    this.onAssetLoaded
+                ),
+                font: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/font.png',
                     this.onAssetLoaded
                 ),
             },
@@ -196,6 +206,45 @@ class Main extends GameObject {
                 this._spawnAlien
             );
             this.addChild(this.alienSpawnTimeout);
+            this.font = new SpriteFont(
+                this.assets.images.font,
+                new Vector2(8, FONT_LINE_HEIGHT),
+                -3,
+                new Map([
+                    [new Vector2(0, 0), Char.range('A', 'Z')],
+                    [new Vector2(8, 1), Char.range('a', 'z')],
+                    [new Vector2(0, 3), Char.range('0', '9')],
+                    [new Vector2(16, 2), ['.', ',']],
+                    [
+                        new Vector2(10, 3),
+                        [
+                            '"',
+                            '´',
+                            '?',
+                            '!',
+                            '#',
+                            '&',
+                            '(',
+                            ')',
+                            '-',
+                            '/',
+                            ':',
+                            ';',
+                        ],
+                    ],
+                    [new Vector2(6, 4), ['Ä']],
+                    [new Vector2(9, 4), ['Ö', 'Ü', 'ß']],
+                    [new Vector2(15, 4), ['ä']],
+                    [new Vector2(10, 5), ['ö']],
+                    [new Vector2(14, 5), ['ü', ' ']],
+                ])
+            );
+            this.scoreBoardRect = new Rectangle(
+                new Vector2(0, this.canvasRect.height),
+                this.canvasRect.width,
+                FONT_LINE_HEIGHT
+            );
+            this.playerScore = 0;
             this.gameEngine.start();
         };
     }
@@ -257,6 +306,7 @@ class Main extends GameObject {
                         alien.startExplosion(this._removeAlien);
                         this.removeChild(bullet);
                         this.playerBullets.splice(idx, 1);
+                        this.playerScore += 76;
                     }
                 }
             }
@@ -306,6 +356,16 @@ class Main extends GameObject {
 
     draw(drawingContext) {
         this.drawChildren(drawingContext);
+
+        /* draw score board background */
+        drawingContext.drawRect(this.scoreBoardRect, SCORE_BOARD_COLOR);
+
+        /* draw player score */
+        this.font.drawString(
+            drawingContext,
+            new Vector2(0, this.canvasRect.height),
+            ` Score: ${String(this.playerScore).padStart(8, '0')}`
+        );
     }
 }
 
