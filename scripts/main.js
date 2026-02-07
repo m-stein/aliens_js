@@ -12,6 +12,7 @@ import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
 import { AudioFile } from './audio_file.js';
 import { Alien } from './alien.js';
+import { Timeout } from './timeout.js';
 
 class Main extends GameObject {
     pressedKeys = new Set();
@@ -190,26 +191,53 @@ class Main extends GameObject {
 
             /** @type {Alien[]} */
             this.aliens = [];
-            this.aliens.push(
-                new Alien(
-                    this.canvasRect,
-                    (bullet) => {
-                        this.alienBullets.push(bullet);
-                        this.addChild(bullet);
-                    },
-                    this.assets.sounds.alienLaser,
-                    this.assets.sounds.alienExplosion,
-                    this.assets.images.alien,
-                    this.assets.images.explosion,
-                    this.assets.images.alienBullet
-                )
+            this.alienSpawnTimeout = new Timeout(
+                this._newAlienSpawnTimeoutMs(),
+                this._spawnAlien
             );
-            for (const alien of this.aliens) {
-                this.addChild(alien);
-            }
+            this.addChild(this.alienSpawnTimeout);
             this.gameEngine.start();
         };
     }
+
+    _spawnAlien = () => {
+        const alien = new Alien(
+            this.canvasRect,
+            (bullet) => {
+                this.alienBullets.push(bullet);
+                this.addChild(bullet);
+            },
+            this.assets.sounds.alienLaser,
+            this.assets.sounds.alienExplosion,
+            this.assets.images.alien,
+            this.assets.images.explosion,
+            this.assets.images.alienBullet
+        );
+        this.aliens.push(alien);
+        this.addChild(alien);
+        this.alienSpawnTimeout.set(this._newAlienSpawnTimeoutMs());
+    };
+
+    /**
+     * @returns {number}
+     */
+    _newAlienSpawnTimeoutMs() {
+        return 500 + Math.random() * (1500 - 500);
+    }
+
+    /**
+     * @param {Alien} alien
+     * @param {number} idx
+     */
+    _removeAlien = (alien, idx = -1) => {
+        if (idx !== -1) {
+            idx = this.aliens.indexOf(alien);
+        }
+        if (idx !== -1) {
+            this.aliens.splice(idx, 1);
+        }
+        this.removeChild(alien);
+    };
 
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
@@ -226,9 +254,7 @@ class Main extends GameObject {
                         continue;
                     }
                     if (bullet.collider().intersectsWith(alien.collider())) {
-                        alien.startExplosion((alienArg) => {
-                            alienArg.respawn();
-                        });
+                        alien.startExplosion(this._removeAlien);
                         this.removeChild(bullet);
                         this.playerBullets.splice(idx, 1);
                     }
@@ -261,7 +287,7 @@ class Main extends GameObject {
         for (let idx = this.aliens.length - 1; idx >= 0; idx--) {
             const alien = this.aliens[idx];
             if (alien.finishedManeuver()) {
-                alien.respawn();
+                this._removeAlien(alien, idx);
             } else {
                 if (!this.player.vulnerable()) {
                     continue;
