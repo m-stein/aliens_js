@@ -17,7 +17,11 @@ import { SpriteFont } from './sprite_font.js';
 import { Char } from './char.js';
 
 const FONT_LINE_HEIGHT = 11;
-const SCORE_BOARD_COLOR = 'rgb(0,0,0)';
+const SCORE_BOARD_PADDING = new Vector2(4, 2);
+const SCORE_BOARD_BORDER_SIZE = 1;
+const SCORE_BOARD_HEIGHT = FONT_LINE_HEIGHT + 2 * SCORE_BOARD_BORDER_SIZE + 2 * SCORE_BOARD_PADDING.y;
+const SCORE_BOARD_BORDER_COLOR = 'rgba(184, 184, 73)';
+const SCORE_BOARD_FILL_COLOR = 'rgb(0,0,0)';
 
 class Main extends GameObject {
     pressedKeys = new Set();
@@ -73,7 +77,7 @@ class Main extends GameObject {
         this.canvasRect = new Rectangle(
             new Vector2(0, 0),
             this.canvas.width,
-            this.canvas.height - FONT_LINE_HEIGHT
+            this.canvas.height - SCORE_BOARD_HEIGHT
         );
         this.settings = new Settings();
 
@@ -209,7 +213,7 @@ class Main extends GameObject {
             this.font = new SpriteFont(
                 this.assets.images.font,
                 new Vector2(8, FONT_LINE_HEIGHT),
-                -3,
+                -1,
                 new Map([
                     [new Vector2(0, 0), Char.range('A', 'Z')],
                     [new Vector2(8, 1), Char.range('a', 'z')],
@@ -239,12 +243,24 @@ class Main extends GameObject {
                     [new Vector2(14, 5), ['ü', ' ']],
                 ])
             );
-            this.scoreBoardRect = new Rectangle(
+            this.scoreBoardBorderRect = new Rectangle(
                 new Vector2(0, this.canvasRect.height),
                 this.canvasRect.width,
-                FONT_LINE_HEIGHT
+                SCORE_BOARD_HEIGHT
+            );
+            this.scoreBoardFillRect = new Rectangle(
+                new Vector2(
+                    SCORE_BOARD_BORDER_SIZE,
+                    this.canvasRect.height + SCORE_BOARD_BORDER_SIZE
+                ),
+                this.canvasRect.width - 2 * SCORE_BOARD_BORDER_SIZE,
+                SCORE_BOARD_HEIGHT - 2 * SCORE_BOARD_BORDER_SIZE
             );
             this.playerScore = 0;
+            this.playerScorePos = 
+                this.scoreBoardFillRect.position
+                    .copy()
+                    .add(SCORE_BOARD_PADDING);
             this.gameEngine.start();
         };
     }
@@ -357,14 +373,15 @@ class Main extends GameObject {
     draw(drawingContext) {
         this.drawChildren(drawingContext);
 
-        /* draw score board background */
-        drawingContext.drawRect(this.scoreBoardRect, SCORE_BOARD_COLOR);
+        /* draw score board */
+        drawingContext.drawRect(this.scoreBoardBorderRect, SCORE_BOARD_BORDER_COLOR);
+        drawingContext.drawRect(this.scoreBoardFillRect, SCORE_BOARD_FILL_COLOR);
 
-        /* draw player score */
+        /* draw player score inside the score board */
         this.font.drawString(
             drawingContext,
-            new Vector2(0, this.canvasRect.height),
-            ` Score: ${String(this.playerScore).padStart(8, '0')}`
+            this.playerScorePos,
+            `Score: ${String(this.playerScore).padStart(8, '0')}`
         );
     }
 }
