@@ -5,6 +5,7 @@ import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
 import { createEnum } from './enum.js';
 import { Timeout } from './timeout.js';
+import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 
 export class Player extends GameObject {
     static State = createEnum({
@@ -71,6 +72,9 @@ export class Player extends GameObject {
         return this.state == Player.State.Alive;
     }
 
+    /**
+     * @param {DrawingContext} drawingContext
+     */
     draw(drawingContext) {
         if (
             this.state == Player.State.Respawning &&
@@ -79,6 +83,9 @@ export class Player extends GameObject {
             return;
         }
         this.drawChildren(drawingContext);
+        if (DRAW_COLLIDERS) {
+            drawingContext.drawRect(this.collider(), DRAW_COLLIDERS_COLOR);
+        }
     }
 
     update(elapsedMs) {

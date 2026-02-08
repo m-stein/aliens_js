@@ -1,4 +1,5 @@
 import { GameObject } from './game_object.js';
+import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 import { Rectangle } from './rectangle.js';
 import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
@@ -48,8 +49,14 @@ export class AlienBullet extends GameObject {
         this.sprite.currFrameIndex = this.frameIdx.value();
     }
 
+    /**
+     * @param {DrawingContext} drawingContext
+     */
     draw(drawingContext) {
         this.drawChildren(drawingContext);
+        if (DRAW_COLLIDERS) {
+            drawingContext.drawRect(this.collider(), DRAW_COLLIDERS_COLOR);
+        }
     }
 
     outOfSight() {

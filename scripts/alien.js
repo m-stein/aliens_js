@@ -5,6 +5,7 @@ import { TimedValue } from './timed_value.js';
 import { Rectangle } from './rectangle.js';
 import { AlienBullet } from './alien_bullet.js';
 import { createEnum } from './enum.js';
+import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 
 export class Alien extends GameObject {
     static State = createEnum({
@@ -131,8 +132,14 @@ export class Alien extends GameObject {
         }
     }
 
+    /**
+     * @param {DrawingContext} drawingContext
+     */
     draw(drawingContext) {
         this.drawChildren(drawingContext);
+        if (DRAW_COLLIDERS) {
+            drawingContext.drawRect(this.collider(), DRAW_COLLIDERS_COLOR);
+        }
     }
 
     _updatePosition(elapsedMs) {
