@@ -256,9 +256,10 @@ class Main extends GameObject {
                 this.canvasRect.width - 2 * SCORE_BOARD_BORDER_SIZE,
                 SCORE_BOARD_HEIGHT - 2 * SCORE_BOARD_BORDER_SIZE
             );
-            this.playerScore = 0;
-            this.playerScoreStr = this._getPlayerScoreStr();
-            this.playerScorePos =
+            this.score = 0;
+            this.bonus = 0;
+            this.scoreBoardStr = this._getScoreBoardStr();
+            this.scoreBoardStrPos =
                 this.scoreBoardFillRect.position
                     .copy()
                     .add(SCORE_BOARD_PADDING);
@@ -269,8 +270,8 @@ class Main extends GameObject {
     /**
      * @returns {string}
      */
-    _getPlayerScoreStr() {
-        return `Score: ${String(this.playerScore).padStart(8, '0')}`
+    _getScoreBoardStr() {
+        return `Score: ${String(this.score).padEnd(8, ' ')}  Bonus: ${this.bonus}`
     }
 
     _spawnAlien = () => {
@@ -321,6 +322,10 @@ class Main extends GameObject {
             if (bullet.outOfSight()) {
                 this.removeChild(bullet);
                 this.playerBullets.splice(idx, 1);
+                if (this.bonus > 0) {
+                    this.bonus -= 1
+                    this.scoreBoardStr = this._getScoreBoardStr();
+                }
             } else {
                 for (const alien of this.aliens) {
                     if (!alien.vulnerable()) {
@@ -330,8 +335,9 @@ class Main extends GameObject {
                         alien.startExplosion(this._removeAlien);
                         this.removeChild(bullet);
                         this.playerBullets.splice(idx, 1);
-                        this.playerScore += 76;
-                        this.playerScoreStr = this._getPlayerScoreStr();
+                        this.score += (5 + this.bonus);
+                        this.bonus += 2;
+                        this.scoreBoardStr = this._getScoreBoardStr();
                     }
                 }
             }
@@ -348,6 +354,8 @@ class Main extends GameObject {
                 }
                 if (bullet.collider().intersectsWith(this.player.collider())) {
                     this.player.respawn();
+                    this.bonus = 0;
+                    this.scoreBoardStr = this._getScoreBoardStr();
                     this.removeChild(bullet);
                     this.alienBullets.splice(idx, 1);
                     const sound =
@@ -369,6 +377,8 @@ class Main extends GameObject {
                 }
                 if (alien.collider().intersectsWith(this.player.collider())) {
                     this.player.respawn();
+                    this.bonus = 0;
+                    this.scoreBoardStr = this._getScoreBoardStr();
                     const sound =
                         this.assets.sounds.playerExplosion.htmlElement;
                     sound.pause();
@@ -389,8 +399,8 @@ class Main extends GameObject {
         /* draw player score inside the score board */
         this.font.drawString(
             drawingContext,
-            this.playerScorePos,
-            this.playerScoreStr
+            this.scoreBoardStrPos,
+            this.scoreBoardStr
         );
     }
 }
