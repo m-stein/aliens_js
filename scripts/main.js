@@ -257,12 +257,20 @@ class Main extends GameObject {
                 SCORE_BOARD_HEIGHT - 2 * SCORE_BOARD_BORDER_SIZE
             );
             this.playerScore = 0;
-            this.playerScorePos = 
+            this.playerScoreStr = this._getPlayerScoreStr();
+            this.playerScorePos =
                 this.scoreBoardFillRect.position
                     .copy()
                     .add(SCORE_BOARD_PADDING);
             this.gameEngine.start();
         };
+    }
+
+    /**
+     * @returns {string}
+     */
+    _getPlayerScoreStr() {
+        return `Score: ${String(this.playerScore).padStart(8, '0')}`
     }
 
     _spawnAlien = () => {
@@ -323,6 +331,7 @@ class Main extends GameObject {
                         this.removeChild(bullet);
                         this.playerBullets.splice(idx, 1);
                         this.playerScore += 76;
+                        this.playerScoreStr = this._getPlayerScoreStr();
                     }
                 }
             }
@@ -381,7 +390,7 @@ class Main extends GameObject {
         this.font.drawString(
             drawingContext,
             this.playerScorePos,
-            `Score: ${String(this.playerScore).padStart(8, '0')}`
+            this.playerScoreStr
         );
     }
 }
