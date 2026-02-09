@@ -50,4 +50,11 @@ export class Vector2 {
         }
         return new Vector2(this.x / len, this.y / len);
     }
+
+    /**
+     * @returns {string}
+     */
+    toString() {
+        return `Vector2(x=${this.x}, y=${this.y})`;
+    }
 }

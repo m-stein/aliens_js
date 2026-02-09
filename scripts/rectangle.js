@@ -45,7 +45,17 @@ export class Rectangle {
         );
     }
 
+    /**
+     * @returns {Rectangle}
+     */
     copy() {
         return new Rectangle(this.position.copy(), this.width, this.height);
+    }
+
+    /**
+     * @returns {string}
+     */
+    toString() {
+        return `Rectangle(left=${this.left}, right=${this.right}, top=${this.top}, bottom=${this.bottom})`;
     }
 }
