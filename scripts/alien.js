@@ -40,8 +40,6 @@ export class Alien extends GameObject {
             { ms: 100, value: 2 },
         ]);
         this.envRect = envRect;
-
-        this.state = Alien.State;
         this.colliderOffset = new Vector2(5, 6);
         this.colliderSize = new Vector2(22, 13);
 
@@ -220,14 +218,21 @@ export class Alien extends GameObject {
     }
 
     collider() {
-        return new Rectangle(
-            new Vector2(
-                this.position.x + this.colliderOffset.x,
-                this.position.y + this.colliderOffset.y
-            ),
-            this.colliderSize.x,
-            this.colliderSize.y
-        );
+        switch (this.state) {
+            case Alien.State.Alive:
+            case Alien.State.Exploding1:
+                return new Rectangle(
+                    new Vector2(
+                        this.position.x + this.colliderOffset.x,
+                        this.position.y + this.colliderOffset.y
+                    ),
+                    this.colliderSize.x,
+                    this.colliderSize.y
+                );
+            case Alien.State.Exploding2:
+            case Alien.State.Destroyed:
+                return new Rectangle(new Vector2(0, 0), 0, 0);
+        }
     }
 
     finishedManeuver() {
