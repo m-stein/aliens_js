@@ -1,3 +1,8 @@
+/**
+ * @template {Record<string, number>} T
+ * @param {T} baseEnum
+ * @returns {Readonly<T>}
+ */
 export function createEnum(baseEnum) {
     return new Proxy(baseEnum, {
         get(target, name) {
