@@ -11,8 +11,6 @@ import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
 import { AudioFile } from './audio_file.js';
-import { Alien } from './alien.js';
-import { Timeout } from './timeout.js';
 import { SpriteFont } from './sprite_font.js';
 import { Char } from './char.js';
 import {
@@ -23,6 +21,7 @@ import {
     SCORE_PER_HIT,
 } from './parameters.js';
 import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
+import { AlienWave } from './alien_wave.js';
 
 class Main extends GameObject {
     pressedKeys = new Set();
@@ -63,8 +62,6 @@ class Main extends GameObject {
 
     constructor(mainWindow, jsonParser, scriptElemId) {
         super(new Vector2(0, 0), 'Main');
-        let textVariable = 5;
-        console.log(`${textVariable}`);
         const scriptElem = mainWindow.document.getElementById(scriptElemId);
         this.window = mainWindow;
         this.server = new Server(
@@ -85,7 +82,6 @@ class Main extends GameObject {
         /** @type {Bullet[]} */
         this.playerBullets = [];
 
-        this.alienBullets = [];
         this.maxNumBullets = 3;
 
         this.window.addEventListener('keydown', this.onKeyDown);
@@ -204,13 +200,15 @@ class Main extends GameObject {
             );
             this.addChild(this.player);
 
-            /** @type {Alien[]} */
-            this.aliens = [];
-            this.alienSpawnTimeout = new Timeout(
-                this._newAlienSpawnTimeoutMs(),
-                this._spawnAlien
+            this.alienWave = new AlienWave(
+                this.canvasRect,
+                this.assets.sounds.alienLaser,
+                this.assets.sounds.alienExplosion,
+                this.assets.images.alien,
+                this.assets.images.explosion,
+                this.assets.images.alienBullet
             );
-            this.addChild(this.alienSpawnTimeout);
+            this.addChild(this.alienWave);
             this.font = new SpriteFont(
                 this.assets.images.font,
                 new Vector2(8, FONT_LINE_HEIGHT),
@@ -258,45 +256,6 @@ class Main extends GameObject {
         };
     }
 
-    _spawnAlien = () => {
-        const alien = new Alien(
-            this.canvasRect,
-            (bullet) => {
-                this.alienBullets.push(bullet);
-                this.addChild(bullet);
-            },
-            this.assets.sounds.alienLaser,
-            this.assets.sounds.alienExplosion,
-            this.assets.images.alien,
-            this.assets.images.explosion,
-            this.assets.images.alienBullet
-        );
-        this.aliens.push(alien);
-        this.addChild(alien);
-        this.alienSpawnTimeout.set(this._newAlienSpawnTimeoutMs());
-    };
-
-    /**
-     * @returns {number}
-     */
-    _newAlienSpawnTimeoutMs() {
-        return 500 + Math.random() * (1500 - 500);
-    }
-
-    /**
-     * @param {Alien} alien
-     * @param {number} idx
-     */
-    _removeAlien = (alien, idx = -1) => {
-        if (idx !== -1) {
-            idx = this.aliens.indexOf(alien);
-        }
-        if (idx !== -1) {
-            this.aliens.splice(idx, 1);
-        }
-        this.removeChild(alien);
-    };
-
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
 
@@ -311,12 +270,12 @@ class Main extends GameObject {
                     this.statusBar.updateScoreBonusStr(this.score, this.bonus);
                 }
             } else {
-                for (const alien of this.aliens) {
+                this.alienWave.forEachAlien((alien) => {
                     if (!alien.vulnerable()) {
-                        continue;
+                        return;
                     }
                     if (bullet.collider().intersectsWith(alien.collider())) {
-                        alien.startExplosion(this._removeAlien);
+                        alien.startExplosion(this.alienWave.removeAlien);
                         this.removeChild(bullet);
                         this.playerBullets.splice(idx, 1);
                         this.score += SCORE_PER_HIT + this.bonus;
@@ -326,23 +285,20 @@ class Main extends GameObject {
                             this.bonus
                         );
                     }
-                }
+                });
             }
         }
         /* handle interactions of all alien bullets */
-        for (let idx = this.alienBullets.length - 1; idx >= 0; idx--) {
-            const bullet = this.alienBullets[idx];
+        this.alienWave.forEachAlienBullet((bullet) => {
             if (bullet.outOfSight()) {
-                this.removeChild(bullet);
-                this.alienBullets.splice(idx, 1);
+                this.alienWave.removeAlienBullet(bullet);
             } else {
                 if (!this.player.vulnerable()) {
-                    continue;
+                    return;
                 }
                 if (bullet.collider().intersectsWith(this.player.collider())) {
                     this.player.respawn();
-                    this.removeChild(bullet);
-                    this.alienBullets.splice(idx, 1);
+                    this.alienWave.removeAlienBullet(bullet);
                     this.bonus = Math.floor(
                         this.bonus / SCORE_BONUS_DIV_PER_DEATH
                     );
@@ -354,15 +310,14 @@ class Main extends GameObject {
                     sound.play();
                 }
             }
-        }
+        });
         /* handle interactions of all aliens */
-        for (let idx = this.aliens.length - 1; idx >= 0; idx--) {
-            const alien = this.aliens[idx];
+        this.alienWave.forEachAlien((alien) => {
             if (alien.finishedManeuver()) {
-                this._removeAlien(alien, idx);
+                this.alienWave.removeAlien(alien);
             } else {
                 if (!this.player.vulnerable()) {
-                    continue;
+                    return;
                 }
                 if (alien.collider().intersectsWith(this.player.collider())) {
                     this.player.respawn();
@@ -377,7 +332,7 @@ class Main extends GameObject {
                     sound.play();
                 }
             }
-        }
+        });
     }
 
     draw(drawingContext) {

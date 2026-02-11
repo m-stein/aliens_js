@@ -15,6 +15,9 @@ export class Alien extends GameObject {
         Destroyed: 3,
     });
 
+    /**
+     * @param {((b: import('./alien_bullet.js').AlienBullet) => void)} addBulletFn
+     */
     constructor(
         envRect,
         addBulletFn,
