@@ -16,19 +16,13 @@ import { Timeout } from './timeout.js';
 import { SpriteFont } from './sprite_font.js';
 import { Char } from './char.js';
 import {
-    SCORE_BOARD_BORDER_COLOR,
-    SCORE_BOARD_BORDER_SIZE,
-    SCORE_BOARD_FILL_COLOR,
-    SCORE_BOARD_PADDING,
+    FONT_LINE_HEIGHT,
     SCORE_BONUS_DECR_PER_MISS,
     SCORE_BONUS_DIV_PER_DEATH,
     SCORE_BONUS_INCR_PER_HIT,
     SCORE_PER_HIT,
 } from './parameters.js';
-
-const FONT_LINE_HEIGHT = 11;
-const SCORE_BOARD_HEIGHT =
-    FONT_LINE_HEIGHT + 2 * SCORE_BOARD_BORDER_SIZE + 2 * SCORE_BOARD_PADDING.y;
+import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
 
 class Main extends GameObject {
     pressedKeys = new Set();
@@ -84,7 +78,7 @@ class Main extends GameObject {
         this.canvasRect = new Rectangle(
             new Vector2(0, 0),
             this.canvas.width,
-            this.canvas.height - SCORE_BOARD_HEIGHT
+            this.canvas.height - STATUS_BAR_HEIGHT
         );
         this.settings = new Settings();
 
@@ -250,34 +244,18 @@ class Main extends GameObject {
                     [new Vector2(14, 5), ['ü', ' ']],
                 ])
             );
-            this.scoreBoardBorderRect = new Rectangle(
-                new Vector2(0, this.canvasRect.height),
-                this.canvasRect.width,
-                SCORE_BOARD_HEIGHT
-            );
-            this.scoreBoardFillRect = new Rectangle(
-                new Vector2(
-                    SCORE_BOARD_BORDER_SIZE,
-                    this.canvasRect.height + SCORE_BOARD_BORDER_SIZE
-                ),
-                this.canvasRect.width - 2 * SCORE_BOARD_BORDER_SIZE,
-                SCORE_BOARD_HEIGHT - 2 * SCORE_BOARD_BORDER_SIZE
-            );
             this.score = 0;
             this.bonus = 0;
-            this.scoreBoardStr = this._getScoreBoardStr();
-            this.scoreBoardStrPos = this.scoreBoardFillRect.position
-                .copy()
-                .add(SCORE_BOARD_PADDING);
+            this.statusBar = new StatusBar(
+                this.canvasRect.bottomLeft(),
+                this.canvasRect.width,
+                this.font,
+                this.score,
+                this.bonus
+            );
+            this.addChild(this.statusBar);
             this.gameEngine.start();
         };
-    }
-
-    /**
-     * @returns {string}
-     */
-    _getScoreBoardStr() {
-        return `Score: ${String(this.score).padEnd(8, ' ')}  Bonus: ${this.bonus}`;
     }
 
     _spawnAlien = () => {
@@ -330,7 +308,7 @@ class Main extends GameObject {
                 this.playerBullets.splice(idx, 1);
                 if (this.bonus > 0) {
                     this.bonus -= SCORE_BONUS_DECR_PER_MISS;
-                    this.scoreBoardStr = this._getScoreBoardStr();
+                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
                 }
             } else {
                 for (const alien of this.aliens) {
@@ -343,7 +321,10 @@ class Main extends GameObject {
                         this.playerBullets.splice(idx, 1);
                         this.score += SCORE_PER_HIT + this.bonus;
                         this.bonus += SCORE_BONUS_INCR_PER_HIT;
-                        this.scoreBoardStr = this._getScoreBoardStr();
+                        this.statusBar.updateScoreBonusStr(
+                            this.score,
+                            this.bonus
+                        );
                     }
                 }
             }
@@ -365,7 +346,7 @@ class Main extends GameObject {
                     this.bonus = Math.floor(
                         this.bonus / SCORE_BONUS_DIV_PER_DEATH
                     );
-                    this.scoreBoardStr = this._getScoreBoardStr();
+                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
                     const sound =
                         this.assets.sounds.playerExplosion.htmlElement;
                     sound.pause();
@@ -388,7 +369,7 @@ class Main extends GameObject {
                     this.bonus = Math.floor(
                         this.bonus / SCORE_BONUS_DIV_PER_DEATH
                     );
-                    this.scoreBoardStr = this._getScoreBoardStr();
+                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
                     const sound =
                         this.assets.sounds.playerExplosion.htmlElement;
                     sound.pause();
@@ -401,23 +382,6 @@ class Main extends GameObject {
 
     draw(drawingContext) {
         this.drawChildren(drawingContext);
-
-        /* draw score board */
-        drawingContext.drawRect(
-            this.scoreBoardBorderRect,
-            SCORE_BOARD_BORDER_COLOR
-        );
-        drawingContext.drawRect(
-            this.scoreBoardFillRect,
-            SCORE_BOARD_FILL_COLOR
-        );
-
-        /* draw player score inside the score board */
-        this.font.drawString(
-            drawingContext,
-            this.scoreBoardStrPos,
-            this.scoreBoardStr
-        );
     }
 }
 

@@ -58,4 +58,11 @@ export class Rectangle {
     toString() {
         return `Rectangle(left=${this.left}, right=${this.right}, top=${this.top}, bottom=${this.bottom})`;
     }
+
+    /**
+     * @returns {Vector2}
+     */
+    bottomLeft() {
+        return new Vector2(this.left, this.bottom);
+    }
 }
