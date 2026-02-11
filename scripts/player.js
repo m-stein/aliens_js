@@ -18,14 +18,7 @@ export class Player extends GameObject {
     constructor(fbRect, image, pressedKeys) {
         super(new Vector2(fbRect.width / 2 - 16, fbRect.height - 32), 'Player');
         this.state = Player.State.Alive;
-        this.sprite = new Sprite({
-            position: new Vector2(0, 0),
-            sourceImage: image,
-            frameSize: new Vector2(32, 32),
-            numColumns: 2,
-            numRows: 1,
-            drawFrameIndex: 0,
-        });
+        this.sprite = new Sprite(image, new Vector2(32, 32), 2, 1);
         this.rifleTipOffset = new Vector2(15.5, 4);
         this.fbRect = fbRect;
         this.pressedKeys = pressedKeys;
@@ -91,7 +84,7 @@ export class Player extends GameObject {
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
         this._updatePosition(elapsedMs);
-        this.sprite.currFrameIndex = this.frameIdx.value();
+        this.sprite.goToFrame(this.frameIdx.value());
     }
 
     /**

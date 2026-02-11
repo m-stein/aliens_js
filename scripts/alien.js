@@ -26,14 +26,7 @@ export class Alien extends GameObject {
     ) {
         super(new Vector2(0, 0), 'Alien');
 
-        this.ufoSprite = new Sprite({
-            position: new Vector2(0, 0),
-            sourceImage: ufoImg,
-            frameSize: new Vector2(32, 32),
-            numColumns: 3,
-            numRows: 1,
-            drawFrameIndex: 0,
-        });
+        this.ufoSprite = new Sprite(ufoImg, new Vector2(32, 32), 3, 1);
         this.ufoFrameIdx = new TimedValue([
             { ms: 100, value: 0 },
             { ms: 100, value: 1 },
@@ -44,14 +37,12 @@ export class Alien extends GameObject {
         this.colliderSize = new Vector2(22, 13);
 
         this.explosionSound = explosionSound;
-        this.explosionSprite = new Sprite({
-            position: new Vector2(1, 0),
-            sourceImage: explosionImg,
-            frameSize: new Vector2(32, 32),
-            numColumns: 21,
-            numRows: 1,
-            drawFrameIndex: 0,
-        });
+        this.explosionSprite = new Sprite(
+            explosionImg,
+            new Vector2(32, 32),
+            21,
+            1
+        );
         const frameMs = 30;
         this.explosionFrameIdx = new TimedValue([
             { ms: frameMs, value: 0 },
@@ -81,10 +72,10 @@ export class Alien extends GameObject {
         this.laserSound = laserSound;
 
         this.maxCurveAmplFactor =
-            this.envRect.width / 2 - this.ufoSprite.frameSize.x / 2;
+            this.envRect.width / 2 - this.ufoSprite.frameWidth() / 2;
 
         this.curveHorizontalShift =
-            -this.ufoSprite.frameSize.x / 2 + this.envRect.width / 2;
+            -this.ufoSprite.frameWidth() / 2 + this.envRect.width / 2;
 
         this.addBulletFn = addBulletFn;
         this.state = Alien.State.Alive;
@@ -155,7 +146,7 @@ export class Alien extends GameObject {
         this.updateChildren(elapsedMs);
         switch (this.state) {
             case Alien.State.Alive:
-                this.ufoSprite.currFrameIndex = this.ufoFrameIdx.value();
+                this.ufoSprite.goToFrame(this.ufoFrameIdx.value());
                 if (this.fireTimeout > elapsedMs) {
                     this.fireTimeout -= elapsedMs;
                 } else {
@@ -166,10 +157,9 @@ export class Alien extends GameObject {
                 break;
 
             case Alien.State.Exploding1:
-                this.explosionSprite.currFrameIndex =
-                    this.explosionFrameIdx.value();
+                this.explosionSprite.goToFrame(this.explosionFrameIdx.value());
                 if (this.explosionFrameIdx.value() < 10) {
-                    this.ufoSprite.currFrameIndex = this.ufoFrameIdx.value();
+                    this.ufoSprite.goToFrame(this.ufoFrameIdx.value());
                 } else {
                     this.removeChild(this.ufoSprite);
                     this.removeChild(this.ufoFrameIdx);
@@ -178,8 +168,7 @@ export class Alien extends GameObject {
                 break;
 
             case Alien.State.Exploding2:
-                this.explosionSprite.currFrameIndex =
-                    this.explosionFrameIdx.value();
+                this.explosionSprite.goToFrame(this.explosionFrameIdx.value());
                 if (this.explosionFrameIdx.value() >= 20) {
                     this.removeChild(this.explosionSprite);
                     this.removeChild(this.explosionFrameIdx);

@@ -22,14 +22,7 @@ export class AlienBullet extends GameObject {
         this.colliderOffset = new Vector2(1, 1);
         this.colliderSize = new Vector2(6, 6);
 
-        this.sprite = new Sprite({
-            position: new Vector2(0, 0),
-            sourceImage: image,
-            frameSize: new Vector2(8, 8),
-            numColumns: 6,
-            numRows: 1,
-            drawFrameIndex: 0,
-        });
+        this.sprite = new Sprite(image, new Vector2(8, 8), 6, 1);
         const frameMs = 100;
         this.frameIdx = new TimedValue([
             { ms: frameMs, value: 0 },
@@ -46,7 +39,7 @@ export class AlienBullet extends GameObject {
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
         this.position.y += this.speed * elapsedMs;
-        this.sprite.currFrameIndex = this.frameIdx.value();
+        this.sprite.goToFrame(this.frameIdx.value());
     }
 
     /**

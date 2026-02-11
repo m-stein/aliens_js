@@ -11,7 +11,7 @@ export class Bullet extends GameObject {
             new Vector2(rifleTip.x - size.x / 2, rifleTip.y - size.y),
             'Bullet'
         );
-        this.sprite = new Sprite({ sourceImage: image });
+        this.sprite = new Sprite(image);
         this.size = size;
         this.speed = 600.0 / 1000;
         this.colliderOffset = this.sprite.position.copy();
