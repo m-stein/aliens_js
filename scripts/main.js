@@ -22,47 +22,87 @@ import {
 } from './parameters.js';
 import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
 import { AlienWave } from './alien_wave.js';
+import { createEnum } from './enum.js';
+import { MainMenu } from './main_menu.js';
+
+const MAX_NUM_PLAYER_BULLETS = 3;
 
 class Main extends GameObject {
-    pressedKeys = new Set();
+    static State = createEnum({
+        MainMenu: 0,
+        Level: 1,
+    });
 
-    onAssetLoaded = (asset) => {
+    _onAssetLoaded = (asset) => {
         removeItem(this.loadingAssets, asset);
         if (this.loadingAssets.length == 0) {
             this.onAllAssetsLoaded();
         }
     };
 
-    onKeyDown = (event) => {
-        const shoot = this.settings.keyShoot();
-        if (event.code == shoot && !this.pressedKeys.has(shoot)) {
-            if (
-                this.player.readyToShoot() &&
-                this.playerBullets.length < this.maxNumBullets
-            ) {
-                let bullet = new Bullet(
-                    this.player.rifleTip(),
-                    this.assets.images.bullet
-                );
-                this.playerBullets.push(bullet);
-                this.addChild(bullet);
-                const sound = this.assets.sounds.playerLaser.htmlElement;
-                sound.pause();
-                sound.currentTime = 0;
-                sound.play();
+    _handleLevelKeyDown(event) {
+        switch (event.code) {
+            case this.settings.fireKey():
+                if (
+                    this.player.readyToShoot() &&
+                    this.playerBullets.length < MAX_NUM_PLAYER_BULLETS
+                ) {
+                    let bullet = new Bullet(
+                        this.player.rifleTip(),
+                        this.assets.images.bullet
+                    );
+                    this.playerBullets.push(bullet);
+                    this.addChild(bullet);
+                    const sound = this.assets.sounds.playerLaser.htmlElement;
+                    sound.pause();
+                    sound.currentTime = 0;
+                    sound.play();
+                }
+                return;
+            case this.settings.exitKey():
+                this._leaveLevel();
+                this._enterMainMenu();
+                return;
+        }
+    }
+
+    _handleMainMenuKeyDown(event) {
+        switch (event.code) {
+            case this.settings.fireKey():
+                this._leaveMainMenu();
+                this._enterLevel();
+                return;
+        }
+    }
+
+    _onKeyDown = (event) => {
+        if (!this.pressedKeys.has(event.code)) {
+            switch (this.state) {
+                case Main.State.MainMenu:
+                    this._handleMainMenuKeyDown(event);
+                    break;
+                case Main.State.Level:
+                    this._handleLevelKeyDown(event);
+                    break;
             }
         }
         this.pressedKeys.add(event.code);
-        this.assets.music.battle.htmlElement.play();
+
+        /* start playing background music if not playing yet */
+        const music = this.assets.music.battle.htmlElement;
+        if (music.paused) {
+            music.play();
+        }
     };
 
-    onKeyUp = (event) => {
+    _onKeyUp = (event) => {
         this.pressedKeys.delete(event.code);
     };
 
     constructor(mainWindow, jsonParser, scriptElemId) {
         super(new Vector2(0, 0), 'Main');
         const scriptElem = mainWindow.document.getElementById(scriptElemId);
+        this.pressedKeys = new Set();
         this.window = mainWindow;
         this.server = new Server(
             Server.Type[scriptElem.getAttribute('serverType')]
@@ -79,13 +119,8 @@ class Main extends GameObject {
         );
         this.settings = new Settings();
 
-        /** @type {Bullet[]} */
-        this.playerBullets = [];
-
-        this.maxNumBullets = 3;
-
-        this.window.addEventListener('keydown', this.onKeyDown);
-        this.window.addEventListener('keyup', this.onKeyUp);
+        this.window.addEventListener('keydown', this._onKeyDown);
+        this.window.addEventListener('keyup', this._onKeyUp);
 
         this.loadingAssets = [];
         this.assets = {
@@ -93,61 +128,61 @@ class Main extends GameObject {
                 player: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/player.png',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 bullet: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/bullet.png',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 alien: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/alien.png',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 alienBullet: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/alien_bullet.png',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 explosion: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/explosion.png',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 font: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/font.png',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
             },
             music: {
                 battle: new AudioFile(
                     this.window.document,
                     this.rootPath + '/music/battle.ogg',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
             },
             sounds: {
                 playerLaser: new AudioFile(
                     this.window.document,
                     this.rootPath + '/sounds/player_laser.wav',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 playerExplosion: new AudioFile(
                     this.window.document,
                     this.rootPath + '/sounds/player_explosion.wav',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 alienLaser: new AudioFile(
                     this.window.document,
                     this.rootPath + '/sounds/alien_laser.wav',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
                 alienExplosion: new AudioFile(
                     this.window.document,
                     this.rootPath + '/sounds/alien_explosion.wav',
-                    this.onAssetLoaded
+                    this._onAssetLoaded
                 ),
             },
         };
@@ -191,24 +226,6 @@ class Main extends GameObject {
             for (const layer of this.starsLayers) {
                 this.addChild(layer);
             }
-
-            /** @type {Player} */
-            this.player = new Player(
-                this.canvasRect,
-                this.assets.images.player,
-                this.pressedKeys
-            );
-            this.addChild(this.player);
-
-            this.alienWave = new AlienWave(
-                this.canvasRect,
-                this.assets.sounds.alienLaser,
-                this.assets.sounds.alienExplosion,
-                this.assets.images.alien,
-                this.assets.images.explosion,
-                this.assets.images.alienBullet
-            );
-            this.addChild(this.alienWave);
             this.font = new SpriteFont(
                 this.assets.images.font,
                 new Vector2(8, FONT_LINE_HEIGHT),
@@ -242,24 +259,75 @@ class Main extends GameObject {
                     [new Vector2(14, 5), ['ü', ' ']],
                 ])
             );
-            this.score = 0;
-            this.bonus = 0;
-            this.statusBar = new StatusBar(
-                this.canvasRect.bottomLeft(),
-                this.canvasRect.width,
-                this.font,
-                this.score,
-                this.bonus
-            );
-            this.addChild(this.statusBar);
+            this._enterMainMenu();
             this.gameEngine.start();
         };
     }
 
-    update(elapsedMs) {
-        this.updateChildren(elapsedMs);
+    _enterMainMenu() {
+        this.mainMenu = new MainMenu(
+            new Rectangle(
+                new Vector2(0, 0),
+                this.canvas.width,
+                this.canvas.height
+            ),
+            this.font
+        );
+        this.addChild(this.mainMenu);
+        this.state = Main.State.MainMenu;
+    }
 
-        /* handle interactions of all player bullets */
+    _leaveMainMenu() {
+        this.removeChild(this.mainMenu);
+        this.mainMenu = null;
+    }
+
+    _enterLevel() {
+        /** @type {Bullet[]} */
+        this.playerBullets = [];
+        this.player = new Player(
+            this.canvasRect,
+            this.assets.images.player,
+            this.pressedKeys
+        );
+        this.addChild(this.player);
+
+        this.alienWave = new AlienWave(
+            this.canvasRect,
+            this.assets.sounds.alienLaser,
+            this.assets.sounds.alienExplosion,
+            this.assets.images.alien,
+            this.assets.images.explosion,
+            this.assets.images.alienBullet
+        );
+        this.addChild(this.alienWave);
+
+        this.score = 0;
+        this.bonus = 0;
+        this.statusBar = new StatusBar(
+            this.canvasRect.bottomLeft(),
+            this.canvasRect.width,
+            this.font,
+            this.score,
+            this.bonus
+        );
+        this.addChild(this.statusBar);
+        this.state = Main.State.Level;
+    }
+
+    _leaveLevel() {
+        this.removeChild(this.statusBar);
+        this.statusBar = null;
+        this.bonus = null;
+        this.score = null;
+        this.removeChild(this.alienWave);
+        this.alienWave = null;
+        this.removeChild(this.player);
+        this.player = null;
+        this.playerBullets = null;
+    }
+
+    _handleInteractionsOfPlayerBullets() {
         for (let idx = this.playerBullets.length - 1; idx >= 0; idx--) {
             const bullet = this.playerBullets[idx];
             if (bullet.outOfSight()) {
@@ -288,7 +356,9 @@ class Main extends GameObject {
                 });
             }
         }
-        /* handle interactions of all alien bullets */
+    }
+
+    _handleInteractionsOfAlienBullets() {
         this.alienWave.forEachAlienBullet((bullet) => {
             if (bullet.outOfSight()) {
                 this.alienWave.removeAlienBullet(bullet);
@@ -311,7 +381,9 @@ class Main extends GameObject {
                 }
             }
         });
-        /* handle interactions of all aliens */
+    }
+
+    _handleInteractionsOfAlienShips() {
         this.alienWave.forEachAlien((alien) => {
             if (alien.finishedManeuver()) {
                 this.alienWave.removeAlien(alien);
@@ -333,6 +405,19 @@ class Main extends GameObject {
                 }
             }
         });
+    }
+
+    update(elapsedMs) {
+        this.updateChildren(elapsedMs);
+        switch (this.state) {
+            case Main.State.MainMenu:
+                break;
+            case Main.State.Level:
+                this._handleInteractionsOfPlayerBullets();
+                this._handleInteractionsOfAlienBullets();
+                this._handleInteractionsOfAlienShips();
+                break;
+        }
     }
 
     draw(drawingContext) {

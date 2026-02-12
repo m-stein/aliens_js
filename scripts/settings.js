@@ -1,5 +1,14 @@
 export class Settings {
-    keyShoot() {
+    /**
+     * @returns {string}
+     */
+    fireKey() {
         return 'Space';
+    }
+    /**
+     * @returns {string}
+     */
+    exitKey() {
+        return 'Escape';
     }
 }

@@ -49,6 +49,20 @@ export class SpriteFont {
     }
 
     /**
+     * @returns {number}
+     */
+    charWidth() {
+        return this._charSize.x;
+    }
+
+    /**
+     * @returns {number}
+     */
+    lineHeight() {
+        return this._charSize.y;
+    }
+
+    /**
      * @param {DrawingContext} drawingContext
      * @param {Vector2} position
      * @param {string} c
