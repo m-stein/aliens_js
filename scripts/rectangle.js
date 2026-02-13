@@ -65,4 +65,11 @@ export class Rectangle {
     bottomLeft() {
         return new Vector2(this.left, this.bottom);
     }
+
+    /**
+     * @returns {Vector2}
+     */
+    bottomCenter() {
+        return new Vector2(this.center.x, this.bottom);
+    }
 }

@@ -44,7 +44,6 @@ export class AlienWave extends GameObject {
             this._spawnAlien
         );
         this.addChild(this._spawnTimeout);
-        console.log('2');
     }
 
     /**
