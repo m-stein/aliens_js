@@ -150,6 +150,11 @@ class Main extends GameObject {
                     this.rootPath + '/images/explosion.png',
                     this._onAssetLoaded
                 ),
+                live: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/live.png',
+                    this._onAssetLoaded
+                ),
                 font: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/font.png',
@@ -309,7 +314,8 @@ class Main extends GameObject {
             this.canvasRect.width,
             this.font,
             this.score,
-            this.bonus
+            this.bonus,
+            this.assets.images.live
         );
         this.addChild(this.statusBar);
         this.state = Main.State.Level;
@@ -367,17 +373,8 @@ class Main extends GameObject {
                     return;
                 }
                 if (bullet.collider().intersectsWith(this.player.collider())) {
-                    this.player.respawn();
                     this.alienWave.removeAlienBullet(bullet);
-                    this.bonus = Math.floor(
-                        this.bonus / SCORE_BONUS_DIV_PER_DEATH
-                    );
-                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
-                    const sound =
-                        this.assets.sounds.playerExplosion.htmlElement;
-                    sound.pause();
-                    sound.currentTime = 0;
-                    sound.play();
+                    this._killPlayer();
                 }
             }
         });
@@ -392,19 +389,21 @@ class Main extends GameObject {
                     return;
                 }
                 if (alien.collider().intersectsWith(this.player.collider())) {
-                    this.player.respawn();
-                    this.bonus = Math.floor(
-                        this.bonus / SCORE_BONUS_DIV_PER_DEATH
-                    );
-                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
-                    const sound =
-                        this.assets.sounds.playerExplosion.htmlElement;
-                    sound.pause();
-                    sound.currentTime = 0;
-                    sound.play();
+                    this._killPlayer();
                 }
             }
         });
+    }
+
+    _killPlayer() {
+        const sound = this.assets.sounds.playerExplosion.htmlElement;
+        sound.pause();
+        sound.currentTime = 0;
+        sound.play();
+        this.bonus = Math.floor(this.bonus / SCORE_BONUS_DIV_PER_DEATH);
+        this.statusBar.updateScoreBonusStr(this.score, this.bonus);
+        this.statusBar.decrNumLives();
+        this.player.respawn();
     }
 
     update(elapsedMs) {
@@ -416,6 +415,10 @@ class Main extends GameObject {
                 this._handleInteractionsOfPlayerBullets();
                 this._handleInteractionsOfAlienBullets();
                 this._handleInteractionsOfAlienShips();
+                if (this.statusBar.numLives() == 0) {
+                    this._leaveLevel();
+                    this._enterMainMenu();
+                }
                 break;
         }
     }

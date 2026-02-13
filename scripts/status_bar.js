@@ -7,6 +7,8 @@ const STATUS_BAR_PADDING = new Vector2(4, 2);
 const STATUS_BAR_BORDER_SIZE = 1;
 const STATUS_BAR_BORDER_COLOR = 'rgba(184, 184, 73)';
 const STATUS_BAR_FILL_COLOR = 'rgb(0,0,0)';
+const MAX_NUM_LIVES = 3;
+const LIVES_SPACING = 2;
 
 export const STATUS_BAR_HEIGHT =
     FONT_LINE_HEIGHT + 2 * STATUS_BAR_BORDER_SIZE + 2 * STATUS_BAR_PADDING.y;
@@ -18,8 +20,9 @@ export class StatusBar extends GameObject {
      * @param {import('./sprite_font.js').SpriteFont} font
      * @param {number} score
      * @param {number} bonus
+     * @param {import('./image_file.js').ImageFile} liveImg
      */
-    constructor(position, width, font, score, bonus) {
+    constructor(position, width, font, score, bonus, liveImg) {
         super(new Vector2(0, 0), 'StatusBar');
 
         this._font = font;
@@ -43,6 +46,28 @@ export class StatusBar extends GameObject {
         this._scoreBonusStrPos = this._fillRect.position
             .copy()
             .add(STATUS_BAR_PADDING);
+
+        this._numLives = MAX_NUM_LIVES;
+        this._liveImg = liveImg;
+        this._liveSrcRectangle = new Rectangle(
+            new Vector2(0, 0),
+            this._liveImg.htmlElement.width,
+            this._liveImg.htmlElement.height
+        );
+        this._liveDstRectangles = [];
+        for (let idx = 0; idx < MAX_NUM_LIVES; idx++) {
+            this._liveDstRectangles[idx] = new Rectangle(
+                new Vector2(
+                    this._fillRect.right -
+                        STATUS_BAR_PADDING.x -
+                        idx * LIVES_SPACING -
+                        (idx + 1) * this._liveImg.htmlElement.width,
+                    this._fillRect.top + STATUS_BAR_PADDING.y
+                ),
+                this._liveImg.htmlElement.width,
+                this._liveImg.htmlElement.height
+            );
+        }
     }
 
     /**
@@ -51,6 +76,19 @@ export class StatusBar extends GameObject {
      */
     updateScoreBonusStr(score, bonus) {
         this._scoreBonusStr = `Score: ${String(score).padEnd(8, ' ')}  Bonus: ${bonus}`;
+    }
+
+    decrNumLives() {
+        if (this._numLives > 0) {
+            this._numLives -= 1;
+        }
+    }
+
+    /**
+     * @return {number}
+     */
+    numLives() {
+        return this._numLives;
     }
 
     /**
@@ -65,6 +103,13 @@ export class StatusBar extends GameObject {
             this._scoreBonusStrPos,
             this._scoreBonusStr
         );
+        for (let idx = 0; idx < this._numLives; idx++) {
+            drawingContext.drawImage(
+                this._liveImg.htmlElement,
+                this._liveSrcRectangle,
+                this._liveDstRectangles[idx]
+            );
+        }
     }
 
     /**
