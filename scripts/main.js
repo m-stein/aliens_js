@@ -11,7 +11,7 @@ import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
 import { AudioFile } from './audio_file.js';
-import { SpriteFont } from './sprite_font.js';
+import { SpriteFont, SpriteFontSource } from './sprite_font.js';
 import { Char } from './char.js';
 import {
     FONT_LINE_HEIGHT,
@@ -231,42 +231,50 @@ class Main extends GameObject {
             for (const layer of this.starsLayers) {
                 this.addChild(layer);
             }
-            this.font = new SpriteFont(
-                this.assets.images.font,
-                new Vector2(8, FONT_LINE_HEIGHT),
-                -1,
-                new Map([
-                    [new Vector2(0, 0), Char.range('A', 'Z')],
-                    [new Vector2(8, 1), Char.range('a', 'z')],
-                    [new Vector2(0, 3), Char.range('0', '9')],
-                    [new Vector2(16, 2), ['.', ',']],
-                    [
-                        new Vector2(10, 3),
-                        [
-                            '"',
-                            '´',
-                            '?',
-                            '!',
-                            '#',
-                            '&',
-                            '(',
-                            ')',
-                            '-',
-                            '/',
-                            ':',
-                            ';',
-                        ],
-                    ],
-                    [new Vector2(6, 4), ['Ä']],
-                    [new Vector2(9, 4), ['Ö', 'Ü', 'ß']],
-                    [new Vector2(15, 4), ['ä']],
-                    [new Vector2(10, 5), ['ö']],
-                    [new Vector2(14, 5), ['ü', ' ']],
-                ])
-            );
+            const fontSrc = this._createFontSource();
+            this.smallFont = new SpriteFont(fontSrc, -1);
+            this.bigFont = new SpriteFont(fontSrc, -1, 2);
             this._enterMainMenu();
             this.gameEngine.start();
         };
+    }
+
+    /**
+     * @returns {SpriteFontSource}
+     */
+    _createFontSource() {
+        return new SpriteFontSource(
+            this.assets.images.font,
+            new Vector2(8, FONT_LINE_HEIGHT),
+            new Map([
+                [new Vector2(0, 0), Char.range('A', 'Z')],
+                [new Vector2(8, 1), Char.range('a', 'z')],
+                [new Vector2(0, 3), Char.range('0', '9')],
+                [new Vector2(16, 2), ['.', ',']],
+                [
+                    new Vector2(10, 3),
+                    [
+                        '"',
+                        '´',
+                        '?',
+                        '!',
+                        '#',
+                        '&',
+                        '(',
+                        ')',
+                        '-',
+                        '/',
+                        ':',
+                        ';',
+                    ],
+                ],
+                [new Vector2(6, 4), ['Ä']],
+                [new Vector2(9, 4), ['Ö', 'Ü', 'ß']],
+                [new Vector2(15, 4), ['ä']],
+                [new Vector2(10, 5), ['ö']],
+                [new Vector2(14, 5), ['ü', ' ']],
+            ])
+        );
     }
 
     _enterMainMenu() {
@@ -276,7 +284,7 @@ class Main extends GameObject {
                 this.canvas.width,
                 this.canvas.height
             ),
-            this.font
+            this.bigFont
         );
         this.addChild(this.mainMenu);
         this.state = Main.State.MainMenu;
@@ -312,7 +320,7 @@ class Main extends GameObject {
         this.statusBar = new StatusBar(
             this.canvasRect.bottomLeft(),
             this.canvasRect.width,
-            this.font,
+            this.smallFont,
             this.score,
             this.bonus,
             this.assets.images.live
