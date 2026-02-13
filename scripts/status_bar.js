@@ -5,7 +5,8 @@ import { FONT_LINE_HEIGHT } from './parameters.js';
 
 const STATUS_BAR_PADDING = new Vector2(4, 2);
 const STATUS_BAR_BORDER_SIZE = 1;
-const STATUS_BAR_BORDER_COLOR = 'rgba(184, 184, 73)';
+const STATUS_BAR_BORDER_COLOR_1 = 'rgba(200, 200, 0)';
+const STATUS_BAR_BORDER_COLOR_2 = 'rgba(150, 150, 0)';
 const STATUS_BAR_FILL_COLOR = 'rgb(0,0,0)';
 const MAX_NUM_LIVES = 3;
 const LIVES_SPACING = 2;
@@ -26,10 +27,15 @@ export class StatusBar extends GameObject {
         super(new Vector2(0, 0), 'StatusBar');
 
         this._font = font;
-        this._borderRect = new Rectangle(
+        this._borderRect1 = new Rectangle(
             position.copy(),
             width,
-            STATUS_BAR_HEIGHT
+            STATUS_BAR_HEIGHT / 2
+        );
+        this._borderRect2 = new Rectangle(
+            this._borderRect1.bottomLeft(),
+            width,
+            STATUS_BAR_HEIGHT / 2
         );
         this._fillRect = new Rectangle(
             position
@@ -96,7 +102,8 @@ export class StatusBar extends GameObject {
      */
     draw(drawingContext) {
         this.drawChildren(drawingContext);
-        drawingContext.drawRect(this._borderRect, STATUS_BAR_BORDER_COLOR);
+        drawingContext.drawRect(this._borderRect1, STATUS_BAR_BORDER_COLOR_1);
+        drawingContext.drawRect(this._borderRect2, STATUS_BAR_BORDER_COLOR_2);
         drawingContext.drawRect(this._fillRect, STATUS_BAR_FILL_COLOR);
         this._font.drawString(
             drawingContext,

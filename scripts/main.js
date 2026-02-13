@@ -232,8 +232,8 @@ class Main extends GameObject {
                 this.addChild(layer);
             }
             const fontSrc = this._createFontSource();
-            this.smallFont = new SpriteFont(fontSrc, -1);
-            this.bigFont = new SpriteFont(fontSrc, -1, 2);
+            this.smallFont = new SpriteFont(fontSrc, 1);
+            this.bigFont = new SpriteFont(fontSrc, 1, 2);
             this._enterMainMenu();
             this.gameEngine.start();
         };
@@ -245,34 +245,13 @@ class Main extends GameObject {
     _createFontSource() {
         return new SpriteFontSource(
             this.assets.images.font,
-            new Vector2(8, FONT_LINE_HEIGHT),
+            new Vector2(9, 9),
             new Map([
-                [new Vector2(0, 0), Char.range('A', 'Z')],
-                [new Vector2(8, 1), Char.range('a', 'z')],
-                [new Vector2(0, 3), Char.range('0', '9')],
-                [new Vector2(16, 2), ['.', ',']],
-                [
-                    new Vector2(10, 3),
-                    [
-                        '"',
-                        '´',
-                        '?',
-                        '!',
-                        '#',
-                        '&',
-                        '(',
-                        ')',
-                        '-',
-                        '/',
-                        ':',
-                        ';',
-                    ],
-                ],
-                [new Vector2(6, 4), ['Ä']],
-                [new Vector2(9, 4), ['Ö', 'Ü', 'ß']],
-                [new Vector2(15, 4), ['ä']],
-                [new Vector2(10, 5), ['ö']],
-                [new Vector2(14, 5), ['ü', ' ']],
+                [new Vector2(32, 0), Char.range('A', 'Z')],
+                [new Vector2(64, 0), Char.range('a', 'z')],
+                [new Vector2(15, 0), Char.range('0', '9')],
+                [new Vector2(25, 0), [':']],
+                [new Vector2(0, 0), ['!']],
             ])
         );
     }
@@ -338,6 +317,9 @@ class Main extends GameObject {
         this.alienWave = null;
         this.removeChild(this.player);
         this.player = null;
+        for (const bullet of this.playerBullets) {
+            this.removeChild(bullet);
+        }
         this.playerBullets = null;
     }
 
