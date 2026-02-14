@@ -14,7 +14,6 @@ import { AudioFile } from './audio_file.js';
 import { SpriteFont, SpriteFontSource } from './sprite_font.js';
 import { Char } from './char.js';
 import {
-    FONT_LINE_HEIGHT,
     SCORE_BONUS_DECR_PER_MISS,
     SCORE_BONUS_DIV_PER_DEATH,
     SCORE_BONUS_INCR_PER_HIT,
@@ -24,6 +23,7 @@ import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
 import { AlienWave } from './alien_wave.js';
 import { createEnum } from './enum.js';
 import { MainMenu } from './main_menu.js';
+import { GameOver } from './game_over.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -31,6 +31,7 @@ class Main extends GameObject {
     static State = createEnum({
         MainMenu: 0,
         Level: 1,
+        GameOver: 2,
     });
 
     _onAssetLoaded = (asset) => {
@@ -58,20 +59,42 @@ class Main extends GameObject {
                     sound.currentTime = 0;
                     sound.play();
                 }
-                return;
+                break;
             case this.settings.exitKey():
-                this._leaveLevel();
-                this._enterMainMenu();
-                return;
+                this._goFromLevelToMainMenu();
+                break;
         }
     }
 
     _handleMainMenuKeyDown(event) {
         switch (event.code) {
             case this.settings.fireKey():
-                this._leaveMainMenu();
-                this._enterLevel();
-                return;
+                this._goFromMainMenuToLevel();
+                break;
+        }
+    }
+
+    _handleGameOverKeyDown(event) {
+        switch (event.code) {
+            case this.settings.fireKey():
+            case this.settings.exitKey():
+                this._goFromGameOverToMainMenu();
+                break;
+        }
+    }
+
+    _tryStartMusic() {
+        if (this.music) {
+            if (this.music.paused) {
+                this.music.play();
+            }
+        }
+    }
+
+    _tryStopMusic() {
+        if (this.music) {
+            this.music.pause();
+            this.music.currentTime = 0;
         }
     }
 
@@ -84,15 +107,13 @@ class Main extends GameObject {
                 case Main.State.Level:
                     this._handleLevelKeyDown(event);
                     break;
+                case Main.State.GameOver:
+                    this._handleGameOverKeyDown(event);
+                    break;
             }
         }
         this.pressedKeys.add(event.code);
-
-        /* start playing background music if not playing yet */
-        const music = this.assets.music.battle.htmlElement;
-        if (music.paused) {
-            music.play();
-        }
+        this._tryStartMusic();
     };
 
     _onKeyUp = (event) => {
@@ -104,6 +125,7 @@ class Main extends GameObject {
         const scriptElem = mainWindow.document.getElementById(scriptElemId);
         this.pressedKeys = new Set();
         this.window = mainWindow;
+        this.music = null;
         this.server = new Server(
             Server.Type[scriptElem.getAttribute('serverType')]
         );
@@ -165,6 +187,11 @@ class Main extends GameObject {
                 battle: new AudioFile(
                     this.window.document,
                     this.rootPath + '/music/battle.ogg',
+                    this._onAssetLoaded
+                ),
+                gameOver: new AudioFile(
+                    this.window.document,
+                    this.rootPath + '/music/game_over.ogg',
                     this._onAssetLoaded
                 ),
             },
@@ -235,6 +262,7 @@ class Main extends GameObject {
             this.smallFont = new SpriteFont(fontSrc, 1);
             this.bigFont = new SpriteFont(fontSrc, 1, 2);
             this._enterMainMenu();
+            this._switchToMusic(this.assets.music.battle);
             this.gameEngine.start();
         };
     }
@@ -269,9 +297,26 @@ class Main extends GameObject {
         this.state = Main.State.MainMenu;
     }
 
-    _leaveMainMenu() {
-        this.removeChild(this.mainMenu);
-        this.mainMenu = null;
+    _enterGameOver() {
+        this.gameOver = new GameOver(
+            new Rectangle(
+                new Vector2(0, 0),
+                this.canvas.width,
+                this.canvas.height
+            ),
+            this.bigFont
+        );
+        this.addChild(this.gameOver);
+        this.state = Main.State.GameOver;
+    }
+
+    /**
+     * @param {AudioFile} audioFile
+     */
+    _switchToMusic(audioFile) {
+        this._tryStopMusic();
+        this.music = audioFile.htmlElement;
+        this._tryStartMusic();
     }
 
     _enterLevel() {
@@ -308,19 +353,45 @@ class Main extends GameObject {
         this.state = Main.State.Level;
     }
 
-    _leaveLevel() {
+    _goFromMainMenuToLevel() {
+        this.removeChild(this.mainMenu);
+        this.mainMenu = null;
+        this._enterLevel();
+    }
+
+    _removeCommonLevelObjects() {
         this.removeChild(this.statusBar);
         this.statusBar = null;
         this.bonus = null;
         this.score = null;
         this.removeChild(this.alienWave);
         this.alienWave = null;
-        this.removeChild(this.player);
-        this.player = null;
         for (const bullet of this.playerBullets) {
             this.removeChild(bullet);
         }
         this.playerBullets = null;
+    }
+
+    _goFromLevelToGameOver() {
+        this.removeChild(this.player);
+        this.player = null;
+        this._enterGameOver();
+        this._switchToMusic(this.assets.music.gameOver);
+    }
+
+    _goFromLevelToMainMenu() {
+        this._removeCommonLevelObjects();
+        this.removeChild(this.player);
+        this.player = null;
+        this._enterMainMenu();
+    }
+
+    _goFromGameOverToMainMenu() {
+        this._removeCommonLevelObjects();
+        this.removeChild(this.gameOver);
+        this.gameOver = null;
+        this._enterMainMenu();
+        this._switchToMusic(this.assets.music.battle);
     }
 
     _handleInteractionsOfPlayerBullets() {
@@ -354,11 +425,14 @@ class Main extends GameObject {
         }
     }
 
-    _handleInteractionsOfAlienBullets() {
+    /**
+     * @param {boolean} playerAlive
+     */
+    _handleInteractionsOfAlienBullets(playerAlive) {
         this.alienWave.forEachAlienBullet((bullet) => {
             if (bullet.outOfSight()) {
                 this.alienWave.removeAlienBullet(bullet);
-            } else {
+            } else if (playerAlive) {
                 if (!this.player.vulnerable()) {
                     return;
                 }
@@ -370,11 +444,14 @@ class Main extends GameObject {
         });
     }
 
-    _handleInteractionsOfAlienShips() {
+    /**
+     * @param {boolean} playerAlive
+     */
+    _handleInteractionsOfAlienShips(playerAlive) {
         this.alienWave.forEachAlien((alien) => {
             if (alien.finishedManeuver()) {
                 this.alienWave.removeAlien(alien);
-            } else {
+            } else if (playerAlive) {
                 if (!this.player.vulnerable()) {
                     return;
                 }
@@ -398,16 +475,21 @@ class Main extends GameObject {
 
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
+        console.log(this.state);
         switch (this.state) {
             case Main.State.MainMenu:
                 break;
+            case Main.State.GameOver:
+                this._handleInteractionsOfPlayerBullets();
+                this._handleInteractionsOfAlienBullets(false);
+                this._handleInteractionsOfAlienShips(false);
+                break;
             case Main.State.Level:
                 this._handleInteractionsOfPlayerBullets();
-                this._handleInteractionsOfAlienBullets();
-                this._handleInteractionsOfAlienShips();
+                this._handleInteractionsOfAlienBullets(true);
+                this._handleInteractionsOfAlienShips(true);
                 if (this.statusBar.numLives() == 0) {
-                    this._leaveLevel();
-                    this._enterMainMenu();
+                    this._goFromLevelToGameOver();
                 }
                 break;
         }
