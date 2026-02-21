@@ -4,33 +4,29 @@ import { randomInt } from './math.js';
 import { Timeout } from './timeout.js';
 import { Vector2 } from './vector_2.js';
 
-const MIN_ALIEN_SPAWN_TIMEOUT_MS = 500;
-const MAX_ALIEN_SPAWN_TIMEOUT_MS = 1500;
-
 export class AlienWave extends GameObject {
     /**
-     * @param {import('./rectangle.js').Rectangle} dstRect
-     * @param {import('./audio_file.js').AudioFile} alienLaserSfx
-     * @param {import('./audio_file.js').AudioFile} alienExplosionSfx
-     * @param {import('./image_file.js').ImageFile} alienImg
-     * @param {import('./image_file.js').ImageFile} explosionImg
-     * @param {import('./image_file.js').ImageFile} alienBulletImg
+     * @param {{
+     *   dstRect: import('./rectangle.js').Rectangle,
+     *   alienLaserSfx: import('./audio_file.js').AudioFile,
+     *   alienExplosionSfx: import('./audio_file.js').AudioFile,
+     *   alienImg: import('./image_file.js').ImageFile,
+     *   explosionImg: import('./image_file.js').ImageFile,
+     *   alienBulletImg: import('./image_file.js').ImageFile
+     *   minSpawnTimeoutMs: number,
+     *   maxSpawnTimeoutMs: number
+     * }} args
      */
-    constructor(
-        dstRect,
-        alienLaserSfx,
-        alienExplosionSfx,
-        alienImg,
-        explosionImg,
-        alienBulletImg
-    ) {
+    constructor(args) {
         super(new Vector2(0, 0), 'AlienWave');
 
-        this._alienLaserSfx = alienLaserSfx;
-        this._alienExplosionSfx = alienExplosionSfx;
-        this._alienImg = alienImg;
-        this._explosionImg = explosionImg;
-        this._alienBulletImg = alienBulletImg;
+        this._alienLaserSfx = args.alienLaserSfx;
+        this._alienExplosionSfx = args.alienExplosionSfx;
+        this._alienImg = args.alienImg;
+        this._explosionImg = args.explosionImg;
+        this._alienBulletImg = args.alienBulletImg;
+        this._minSpawnTimeoutMs = args.maxSpawnTimeoutMs;
+        this._maxSpawnTimeoutMs = args.maxSpawnTimeoutMs;
 
         /** @type {Alien[]} */
         this._aliens = [];
@@ -38,7 +34,7 @@ export class AlienWave extends GameObject {
         /** @type {import('./alien_bullet.js').AlienBullet[]} */
         this._alienBullets = [];
 
-        this._dstRect = dstRect;
+        this._dstRect = args.dstRect;
         this._spawnTimeout = new Timeout(
             this._newSpawnTimeoutMs(),
             this._spawnAlien
@@ -100,10 +96,7 @@ export class AlienWave extends GameObject {
      * @returns {number}
      */
     _newSpawnTimeoutMs() {
-        return randomInt(
-            MIN_ALIEN_SPAWN_TIMEOUT_MS,
-            MAX_ALIEN_SPAWN_TIMEOUT_MS
-        );
+        return randomInt(this._minSpawnTimeoutMs, this._maxSpawnTimeoutMs);
     }
 
     /**
