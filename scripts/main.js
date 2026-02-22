@@ -24,7 +24,7 @@ import { AlienWave } from './alien_wave.js';
 import { createEnum } from './enum.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
-import { ObjectFactory } from './object_factory.js';
+import { ObjectFactory } from 'jus';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -346,7 +346,7 @@ class Main extends GameObject {
         /** @type {AlienWave | null} */
         this.alienWave = this.waveFactory.createObjFromJson(
             JSON.parse(
-                '{"class": "AlienWave", "params": { "minSpawnTimeoutMs": 1000, "minSpawnTimeoutMs": 1500 }}'
+                '{"class": "AlienWave", "params": { "minSpawnTimeoutMs": 1000, "maxSpawnTimeoutMs": 1500 }}'
             )
         );
         this.addChild(this.alienWave);
