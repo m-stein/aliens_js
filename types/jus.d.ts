@@ -24,4 +24,13 @@ declare module 'jus' {
             params?: Record<string, any>;
         }): any;
     }
+    export class JsonFile {
+        constructor(
+            htmlDocument: Document,
+            jsonParser: JSON,
+            relPath: string,
+            onLoaded: (file: JsonFile) => void
+        );
+        get data(): any;
+    }
 }
