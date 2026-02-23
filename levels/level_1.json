@@ -1,4 +1,0 @@
-{
-    "class": "AlienWave",
-    "params": { "minSpawnTimeoutMs": 1000, "maxSpawnTimeoutMs": 1500 }
-}

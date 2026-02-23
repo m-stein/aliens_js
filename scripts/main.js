@@ -20,11 +20,10 @@ import {
     SCORE_PER_HIT,
 } from './parameters.js';
 import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
-import { AlienWave } from './alien_wave.js';
 import { createEnum } from './enum.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
-import { ObjectFactory, JsonFile } from 'jus';
+import { Level1 } from './level_1.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -147,14 +146,6 @@ class Main extends GameObject {
 
         this.loadingAssets = [];
         this.assets = {
-            json: {
-                level1: new JsonFile(
-                    this.window.document,
-                    this.jsonParser,
-                    this.rootPath + '/levels/level_1.json',
-                    this._onAssetLoaded
-                ),
-            },
             images: {
                 player: new ImageFile(
                     this.window.document,
@@ -337,25 +328,15 @@ class Main extends GameObject {
             this.pressedKeys
         );
         this.addChild(this.player);
-        this.waveFactory = new ObjectFactory([
-            {
-                constructor: AlienWave,
-                context: {
-                    dstRect: this.canvasRect,
-                    alienLaserSfx: this.assets.sounds.alienLaser,
-                    alienExplosionSfx: this.assets.sounds.alienExplosion,
-                    alienImg: this.assets.images.alien,
-                    explosionImg: this.assets.images.explosion,
-                    alienBulletImg: this.assets.images.alienBullet,
-                },
-            },
-        ]);
-        /** @type {AlienWave | null} */
-        this.alienWave = this.waveFactory.createObjFromJson(
-            this.assets.json.level1.data
-        );
-        this.addChild(this.alienWave);
-
+        this.level = new Level1({
+            dstRect: this.canvasRect,
+            alienLaserSfx: this.assets.sounds.alienLaser,
+            alienExplosionSfx: this.assets.sounds.alienExplosion,
+            alienImg: this.assets.images.alien,
+            explosionImg: this.assets.images.explosion,
+            alienBulletImg: this.assets.images.alienBullet,
+        });
+        this.addChild(this.level);
         this.score = 0;
         this.bonus = 0;
         this.statusBar = new StatusBar(
@@ -381,8 +362,8 @@ class Main extends GameObject {
         this.statusBar = null;
         this.bonus = null;
         this.score = null;
-        this.removeChild(this.alienWave);
-        this.alienWave = null;
+        this.removeChild(this.level);
+        this.level = null;
         for (const bullet of this.playerBullets) {
             this.removeChild(bullet);
         }
@@ -422,64 +403,18 @@ class Main extends GameObject {
                     this.statusBar.updateScoreBonusStr(this.score, this.bonus);
                 }
             } else {
-                this.alienWave.forEachAlien((alien) => {
-                    if (!alien.vulnerable()) {
-                        return;
-                    }
-                    if (bullet.collider().intersectsWith(alien.collider())) {
-                        alien.startExplosion(this.alienWave.removeAlien);
-                        this.removeChild(bullet);
-                        this.playerBullets.splice(idx, 1);
-                        this.score += SCORE_PER_HIT + this.bonus;
-                        this.bonus += SCORE_BONUS_INCR_PER_HIT;
-                        this.statusBar.updateScoreBonusStr(
-                            this.score,
-                            this.bonus
-                        );
-                    }
+                this.level.handlePlayerBulletInteractions(bullet, () => {
+                    this.playerBullets.splice(idx, 1);
+                    this.removeChild(bullet);
+                    this.score += SCORE_PER_HIT + this.bonus;
+                    this.bonus += SCORE_BONUS_INCR_PER_HIT;
+                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
                 });
             }
         }
     }
 
-    /**
-     * @param {boolean} playerAlive
-     */
-    _handleInteractionsOfAlienBullets(playerAlive) {
-        this.alienWave.forEachAlienBullet((bullet) => {
-            if (bullet.outOfSight()) {
-                this.alienWave.removeAlienBullet(bullet);
-            } else if (playerAlive) {
-                if (!this.player.vulnerable()) {
-                    return;
-                }
-                if (bullet.collider().intersectsWith(this.player.collider())) {
-                    this.alienWave.removeAlienBullet(bullet);
-                    this._killPlayer();
-                }
-            }
-        });
-    }
-
-    /**
-     * @param {boolean} playerAlive
-     */
-    _handleInteractionsOfAlienShips(playerAlive) {
-        this.alienWave.forEachAlien((alien) => {
-            if (alien.finishedManeuver()) {
-                this.alienWave.removeAlien(alien);
-            } else if (playerAlive) {
-                if (!this.player.vulnerable()) {
-                    return;
-                }
-                if (alien.collider().intersectsWith(this.player.collider())) {
-                    this._killPlayer();
-                }
-            }
-        });
-    }
-
-    _killPlayer() {
+    _killPlayer = () => {
         const sound = this.assets.sounds.playerExplosion.htmlElement;
         sound.pause();
         sound.currentTime = 0;
@@ -488,7 +423,7 @@ class Main extends GameObject {
         this.statusBar.updateScoreBonusStr(this.score, this.bonus);
         this.statusBar.decrNumLives();
         this.player.respawn();
-    }
+    };
 
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
@@ -497,13 +432,19 @@ class Main extends GameObject {
                 break;
             case Main.State.GameOver:
                 this._handleInteractionsOfPlayerBullets();
-                this._handleInteractionsOfAlienBullets(false);
-                this._handleInteractionsOfAlienShips(false);
+                this.level.handleAlienBulletInteractions();
+                this.level.handleAlienShipInteractions();
                 break;
             case Main.State.Level:
                 this._handleInteractionsOfPlayerBullets();
-                this._handleInteractionsOfAlienBullets(true);
-                this._handleInteractionsOfAlienShips(true);
+                this.level.handleAlienBulletInteractions(
+                    this.player,
+                    this._killPlayer
+                );
+                this.level.handleAlienShipInteractions(
+                    this.player,
+                    this._killPlayer
+                );
                 if (this.statusBar.numLives() == 0) {
                     this._goFromLevelToGameOver();
                 }
