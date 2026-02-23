@@ -15,6 +15,7 @@ export class AlienWave extends GameObject {
      *   alienBulletImg: import('./image_file.js').ImageFile
      *   minSpawnTimeoutMs: number,
      *   maxSpawnTimeoutMs: number
+     *   onAlienSpawned: (numAliensSpawned: number) => void
      * }} args
      */
     constructor(args) {
@@ -25,8 +26,10 @@ export class AlienWave extends GameObject {
         this._alienImg = args.alienImg;
         this._explosionImg = args.explosionImg;
         this._alienBulletImg = args.alienBulletImg;
-        this._minSpawnTimeoutMs = args.maxSpawnTimeoutMs;
+        this._minSpawnTimeoutMs = args.minSpawnTimeoutMs;
         this._maxSpawnTimeoutMs = args.maxSpawnTimeoutMs;
+        this._numAliensSpawned = 0;
+        this._onAlienSpawned = args.onAlienSpawned;
 
         /** @type {Alien[]} */
         this._aliens = [];
@@ -40,6 +43,15 @@ export class AlienWave extends GameObject {
             this._spawnAlien
         );
         this.addChild(this._spawnTimeout);
+    }
+
+    /**
+     * @param {number} minSpawnTimeoutMs
+     * @param {number} maxSpawnTimeoutMs
+     */
+    changeConfig(minSpawnTimeoutMs, maxSpawnTimeoutMs) {
+        this._minSpawnTimeoutMs = minSpawnTimeoutMs;
+        this._maxSpawnTimeoutMs = maxSpawnTimeoutMs;
     }
 
     /**
@@ -89,6 +101,8 @@ export class AlienWave extends GameObject {
         );
         this._aliens.push(alien);
         this.addChild(alien);
+        this._numAliensSpawned++;
+        this._onAlienSpawned(this._numAliensSpawned);
         this._spawnTimeout.set(this._newSpawnTimeoutMs());
     };
 

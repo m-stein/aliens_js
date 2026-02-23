@@ -18,10 +18,23 @@ export class Level1 extends GameObject {
         this.alienWave = new AlienWave({
             ...args,
             minSpawnTimeoutMs: 1000,
-            maxSpawnTimeoutMs: 1500,
+            maxSpawnTimeoutMs: 3000,
+            onAlienSpawned: this._onAlienSpawned,
         });
         this.addChild(this.alienWave);
     }
+
+    /**
+     * @param {number} numAliensSpawned
+     */
+    _onAlienSpawned = (numAliensSpawned) => {
+        if (numAliensSpawned == 10) {
+            this.alienWave.changeConfig(100, 300);
+        }
+        if (numAliensSpawned == 30) {
+            this.alienWave.changeConfig(3000, 5000);
+        }
+    };
 
     /**
      * @param {import('./bullet.js').Bullet} bullet
