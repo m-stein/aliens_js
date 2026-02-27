@@ -17,7 +17,7 @@ export class Level1 extends GameObject {
         super(new Vector2(0, 0), 'Level1');
         this.alienWave = new AlienWave({
             ...args,
-            minSpawnTimeoutMs: 1000,
+            minSpawnTimeoutMs: 2000,
             maxSpawnTimeoutMs: 3000,
             onAlienSpawned: this._onAlienSpawned,
         });
@@ -28,11 +28,34 @@ export class Level1 extends GameObject {
      * @param {number} numAliensSpawned
      */
     _onAlienSpawned = (numAliensSpawned) => {
-        if (numAliensSpawned == 10) {
-            this.alienWave.changeConfig(100, 300);
-        }
-        if (numAliensSpawned == 30) {
-            this.alienWave.changeConfig(3000, 5000);
+        switch (numAliensSpawned) {
+            case 5: // +5
+                this.alienWave.changeConfig(1800, 2800);
+                break;
+            case 11: // +6
+                this.alienWave.changeConfig(1600, 2600);
+                break;
+            case 18: // +7
+                this.alienWave.changeConfig(1400, 2400);
+                break;
+            case 26: // +8
+                this.alienWave.changeConfig(1200, 2200);
+                break;
+            case 35: // +9
+                this.alienWave.changeConfig(1000, 2000);
+                break;
+            case 45: // + 10
+                this.alienWave.changeConfig(800, 1800);
+                break;
+            case 56: // + 11
+                this.alienWave.changeConfig(600, 1600);
+                break;
+            case 68: // + 12
+                this.alienWave.changeConfig(400, 1400);
+                break;
+            case 81: // + 13
+                this.alienWave.changeConfig(200, 1200);
+                break;
         }
     };
 
