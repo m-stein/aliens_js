@@ -29,9 +29,10 @@ const MAX_NUM_PLAYER_BULLETS = 3;
 
 class Main extends GameObject {
     static State = createEnum({
-        MainMenu: 0,
-        Level: 1,
-        GameOver: 2,
+        PressAnyButton: 0,
+        MainMenu: 1,
+        Level: 2,
+        GameOver: 3,
     });
 
     _onAssetLoaded = (asset) => {
@@ -66,20 +67,32 @@ class Main extends GameObject {
         }
     }
 
-    _handleMainMenuKeyDown(event) {
+    _handlePressAnyButtonKeyDown(event) {
         switch (event.code) {
             case this.settings.fireKey():
-                this._goFromMainMenuToLevel();
+                this._goFromPressAnyButtonToMainMenu();
                 break;
         }
     }
 
+    _handleMainMenuKeyDown(event) {
+        if (this.mainMenu.acceptsInput()) {
+            switch (event.code) {
+                case this.settings.fireKey():
+                    this._goFromMainMenuToLevel();
+                    break;
+            }
+        }
+    }
+
     _handleGameOverKeyDown(event) {
-        switch (event.code) {
-            case this.settings.fireKey():
-            case this.settings.exitKey():
-                this._goFromGameOverToMainMenu();
-                break;
+        if (this.gameOver.acceptsInput()) {
+            switch (event.code) {
+                case this.settings.fireKey():
+                case this.settings.exitKey():
+                    this._goFromGameOverToMainMenu();
+                    break;
+            }
         }
     }
 
@@ -101,6 +114,9 @@ class Main extends GameObject {
     _onKeyDown = (event) => {
         if (!this.pressedKeys.has(event.code)) {
             switch (this.state) {
+                case Main.State.PressAnyButton:
+                    this._handlePressAnyButtonKeyDown(event);
+                    break;
                 case Main.State.MainMenu:
                     this._handleMainMenuKeyDown(event);
                     break;
@@ -261,7 +277,7 @@ class Main extends GameObject {
             const fontSrc = this._createFontSource();
             this.smallFont = new SpriteFont(fontSrc, 1);
             this.bigFont = new SpriteFont(fontSrc, 1, 2);
-            this._enterMainMenu();
+            this._enterPressAnyButton();
             this._switchToMusic(this.assets.music.battle);
             this.gameEngine.start();
         };
@@ -282,6 +298,10 @@ class Main extends GameObject {
                 [new Vector2(0, 0), ['!']],
             ])
         );
+    }
+
+    _enterPressAnyButton() {
+        this.state = Main.State.PressAnyButton;
     }
 
     _enterMainMenu() {
@@ -349,6 +369,10 @@ class Main extends GameObject {
         );
         this.addChild(this.statusBar);
         this.state = Main.State.Level;
+    }
+
+    _goFromPressAnyButtonToMainMenu() {
+        this._enterMainMenu();
     }
 
     _goFromMainMenuToLevel() {
@@ -428,6 +452,7 @@ class Main extends GameObject {
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
         switch (this.state) {
+            case Main.State.PressAnyButton:
             case Main.State.MainMenu:
                 break;
             case Main.State.GameOver:
@@ -454,6 +479,16 @@ class Main extends GameObject {
 
     draw(drawingContext) {
         this.drawChildren(drawingContext);
+        if (this.state == Main.State.PressAnyButton) {
+            this.smallFont.drawString(
+                drawingContext,
+                new Vector2(
+                    3,
+                    this.canvas.height - this.smallFont.lineHeight() - 5
+                ),
+                'Press any button'
+            );
+        }
     }
 }
 

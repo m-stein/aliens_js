@@ -1,4 +1,5 @@
 import { GameObject } from './game_object.js';
+import { Timeout } from './timeout.js';
 import { Vector2 } from './vector_2.js';
 
 export class GameOver extends GameObject {
@@ -7,7 +8,7 @@ export class GameOver extends GameObject {
      * @param {import('./sprite_font.js').SpriteFont} titleFont
      */
     constructor(rect, titleFont) {
-        super(null, 'GameOver');
+        super(new Vector2(0, 0), 'GameOver');
 
         this._rect = rect;
         this._titleFont = titleFont;
@@ -24,17 +25,32 @@ export class GameOver extends GameObject {
                     (this._rect.height - this._titleFont.lineHeight()) / 2
                 )
         );
+        this._acceptsInput = false;
+        this._timeout = new Timeout(2000, () => {
+            this._acceptsInput = true;
+        });
+        this.addChild(this._timeout);
     }
 
     /**
-     * @param {number} _deltaMs
+     * @returns {boolean}
      */
-    update(_deltaMs) {}
+    acceptsInput() {
+        return this._acceptsInput;
+    }
+
+    /**
+     * @param {number} deltaMs
+     */
+    update(deltaMs) {
+        this.updateChildren(deltaMs);
+    }
 
     /**
      * @param {import('drawing_context.js').DrawingContext} drawingContext
      */
     draw(drawingContext) {
+        this.drawChildren(drawingContext);
         this._titleFont.drawString(drawingContext, this._titlePos, this._title);
     }
 }

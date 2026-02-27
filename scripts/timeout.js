@@ -1,4 +1,5 @@
 import { GameObject } from './game_object.js';
+import { Vector2 } from './vector_2.js';
 
 export class Timeout extends GameObject {
     /**
@@ -6,7 +7,7 @@ export class Timeout extends GameObject {
      * @param {(() => void) | null} action
      */
     constructor(ms = 0, action = null) {
-        super(null, 'Timeout');
+        super(new Vector2(0, 0), 'Timeout');
 
         /** @type {(() => void) | null} */
         this._action = action;
