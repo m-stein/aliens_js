@@ -24,6 +24,7 @@ import { createEnum } from './enum.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
 import { Level1 } from './level_1.js';
+import { Asteroid } from './asteroid.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -186,6 +187,11 @@ class Main extends GameObject {
                 explosion: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/explosion.png',
+                    this._onAssetLoaded
+                ),
+                asteroid0: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/asteroid_0.png',
                     this._onAssetLoaded
                 ),
                 live: new ImageFile(
@@ -357,6 +363,8 @@ class Main extends GameObject {
             alienBulletImg: this.assets.images.alienBullet,
         });
         this.addChild(this.level);
+        this.asteroid = new Asteroid(this.assets.images.asteroid0);
+        this.addChild(this.asteroid);
         this.score = 0;
         this.bonus = 0;
         this.statusBar = new StatusBar(
