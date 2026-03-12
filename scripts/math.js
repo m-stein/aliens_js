@@ -16,6 +16,11 @@ export function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
 
+/**
+ * @param {number} minInclusive
+ * @param {number} maxExclusive
+ * @returns {number}
+ */
 export function randomInt(minInclusive, maxExclusive) {
     return (
         Math.floor(Math.random() * (maxExclusive - minInclusive)) + minInclusive
