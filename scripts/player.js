@@ -25,7 +25,7 @@ export class Player extends GameObject {
         this.speed = 300 / 1000;
         this.colliderOffset = new Vector2(10, 7);
         this.colliderSize = new Vector2(11, 17);
-        this.minY = this.fbRect.height - 100 - this.colliderOffset.y;
+        this.minY = this.fbRect.top;
         this.maxY =
             this.fbRect.height - this.colliderOffset.y - this.colliderSize.y;
         this.minX = -this.colliderOffset.x;
