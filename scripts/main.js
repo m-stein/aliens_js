@@ -24,7 +24,6 @@ import { createEnum } from './enum.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
 import { Level1 } from './level_1.js';
-import { Asteroid } from './asteroid.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -194,6 +193,31 @@ class Main extends GameObject {
                     this.rootPath + '/images/asteroid_0.png',
                     this._onAssetLoaded
                 ),
+                asteroid1: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/asteroid_1.png',
+                    this._onAssetLoaded
+                ),
+                asteroid2: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/asteroid_2.png',
+                    this._onAssetLoaded
+                ),
+                asteroid3: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/asteroid_3.png',
+                    this._onAssetLoaded
+                ),
+                asteroid4: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/asteroid_4.png',
+                    this._onAssetLoaded
+                ),
+                asteroid5: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/asteroid_5.png',
+                    this._onAssetLoaded
+                ),
                 live: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/live.png',
@@ -354,6 +378,32 @@ class Main extends GameObject {
             this.pressedKeys
         );
         this.addChild(this.player);
+        const asteroidParams = [
+            {
+                image: this.assets.images.asteroid0,
+                collider: new Rectangle(new Vector2(58, 60), 90, 72),
+            },
+            {
+                image: this.assets.images.asteroid1,
+                collider: new Rectangle(new Vector2(52, 66), 96, 70),
+            },
+            {
+                image: this.assets.images.asteroid2,
+                collider: new Rectangle(new Vector2(60, 82), 134, 88),
+            },
+            {
+                image: this.assets.images.asteroid3,
+                collider: new Rectangle(new Vector2(72, 80), 106, 112),
+            },
+            {
+                image: this.assets.images.asteroid4,
+                collider: new Rectangle(new Vector2(41, 62), 144, 100),
+            },
+            {
+                image: this.assets.images.asteroid5,
+                collider: new Rectangle(new Vector2(42, 66), 142, 85),
+            },
+        ];
         this.level = new Level1({
             dstRect: this.canvasRect,
             alienLaserSfx: this.assets.sounds.alienLaser,
@@ -361,10 +411,9 @@ class Main extends GameObject {
             alienImg: this.assets.images.alien,
             explosionImg: this.assets.images.explosion,
             alienBulletImg: this.assets.images.alienBullet,
+            asteroidParams: asteroidParams,
         });
         this.addChild(this.level);
-        this.asteroid = new Asteroid(this.assets.images.asteroid0);
-        this.addChild(this.asteroid);
         this.score = 0;
         this.bonus = 0;
         this.statusBar = new StatusBar(
@@ -435,13 +484,21 @@ class Main extends GameObject {
                     this.statusBar.updateScoreBonusStr(this.score, this.bonus);
                 }
             } else {
-                this.level.handlePlayerBulletInteractions(bullet, () => {
-                    this.playerBullets.splice(idx, 1);
-                    this.removeChild(bullet);
-                    this.score += SCORE_PER_HIT + this.bonus;
-                    this.bonus += SCORE_BONUS_INCR_PER_HIT;
-                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
-                });
+                this.level.handlePlayerBulletInteractions(
+                    bullet,
+                    () => {
+                        this.playerBullets.splice(idx, 1);
+                        this.removeChild(bullet);
+                    },
+                    () => {
+                        this.score += SCORE_PER_HIT + this.bonus;
+                        this.bonus += SCORE_BONUS_INCR_PER_HIT;
+                        this.statusBar.updateScoreBonusStr(
+                            this.score,
+                            this.bonus
+                        );
+                    }
+                );
             }
         }
     }
@@ -465,11 +522,16 @@ class Main extends GameObject {
                 break;
             case Main.State.GameOver:
                 this._handleInteractionsOfPlayerBullets();
+                this.level.handleAsteroidInteractions();
                 this.level.handleAlienBulletInteractions();
                 this.level.handleAlienShipInteractions();
                 break;
             case Main.State.Level:
                 this._handleInteractionsOfPlayerBullets();
+                this.level.handleAsteroidInteractions(
+                    this.player,
+                    this._killPlayer
+                );
                 this.level.handleAlienBulletInteractions(
                     this.player,
                     this._killPlayer
