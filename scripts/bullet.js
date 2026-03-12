@@ -5,6 +5,10 @@ import { Sprite } from './sprite.js';
 import { Vector2 } from './vector_2.js';
 
 export class Bullet extends GameObject {
+    /**
+     * @param {Vector2} rifleTip
+     * @param {import('./image_file.js').ImageFile} image
+     */
     constructor(rifleTip, image) {
         let size = new Vector2(3, 7);
         super(
@@ -18,11 +22,17 @@ export class Bullet extends GameObject {
         this.addChild(this.sprite);
     }
 
+    /**
+     * @param {number} elapsedMs
+     */
     update(elapsedMs) {
         this.position.y -= this.speed * elapsedMs;
         this.updateChildren(elapsedMs);
     }
 
+    /**
+     * @param {import('drawing_context.js').DrawingContext} drawingContext
+     */
     draw(drawingContext) {
         this.drawChildren(drawingContext);
         if (DRAW_COLLIDERS) {
@@ -30,6 +40,9 @@ export class Bullet extends GameObject {
         }
     }
 
+    /**
+     * @returns {boolean}
+     */
     outOfSight() {
         return this.position.y < -this.size.y;
     }

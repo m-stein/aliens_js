@@ -1,4 +1,9 @@
 export class AudioFile {
+    /**
+     * @param {Document} htmlDocument
+     * @param {string} relPath
+     * @param {(a: AudioFile) => void} onLoaded
+     */
     constructor(htmlDocument, relPath, onLoaded) {
         this.relPath = relPath;
         this.onLoaded = onLoaded;
