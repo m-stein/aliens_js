@@ -1,6 +1,6 @@
 import { GameObject } from './game_object.js';
 import { Timeout } from './timeout.js';
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 
 export class MainMenu extends GameObject {
     /**

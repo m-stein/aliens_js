@@ -1,7 +1,7 @@
 import { GameObject } from './game_object.js';
 import { Rectangle } from './rectangle.js';
 import { DrawingContext } from './drawing_context.js';
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 import { clamp, randomInt } from './math.js';
 
 export class Stars extends GameObject {

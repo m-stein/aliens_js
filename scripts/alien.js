@@ -1,5 +1,5 @@
 import { GameObject } from './game_object.js';
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
 import { Rectangle } from './rectangle.js';

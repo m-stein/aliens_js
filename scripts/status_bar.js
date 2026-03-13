@@ -1,6 +1,6 @@
 import { GameObject } from './game_object.js';
 import { Rectangle } from './rectangle.js';
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 import { FONT_LINE_HEIGHT } from './parameters.js';
 
 const STATUS_BAR_PADDING = new Vector2(4, 2);

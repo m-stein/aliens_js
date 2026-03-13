@@ -2,7 +2,7 @@ import { GameObject } from './game_object.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 import { Rectangle } from './rectangle.js';
 import { Sprite } from './sprite.js';
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 
 export class Bullet extends GameObject {
     /**

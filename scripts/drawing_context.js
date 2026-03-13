@@ -1,4 +1,4 @@
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 
 export class DrawingContext {
     constructor(canvas) {

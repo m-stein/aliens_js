@@ -1,6 +1,6 @@
 import { removeItem } from './array_utilities.js';
 import { DrawingContext } from './drawing_context.js';
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 
 export class GameObject {
     constructor(position, label) {

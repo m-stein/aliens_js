@@ -2,7 +2,7 @@ import { Alien } from './alien.js';
 import { GameObject } from './game_object.js';
 import { randomInt } from './math.js';
 import { Timeout } from './timeout.js';
-import { Vector2 } from './vector_2.js';
+import { Vector2 } from 'jus/vector_2.js';
 
 export class AlienWave extends GameObject {
     /**
@@ -95,7 +95,7 @@ export class AlienWave extends GameObject {
     }
 
     /**
-     * @param {import('drawing_context.js').DrawingContext} drawingContext
+     * @param {import('./drawing_context.js').DrawingContext} drawingContext
      */
     draw(drawingContext) {
         this.drawChildren(drawingContext);
