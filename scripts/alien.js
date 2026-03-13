@@ -1,12 +1,12 @@
 import { GameObject } from './game_object.js';
-import { Vector2 } from 'jus/vector_2.js';
+import { Vector2 } from 'jet/vector_2.js';
 import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
-import { Rectangle } from 'jus/rectangle.js';
+import { Rectangle } from 'jet/rectangle.js';
 import { AlienBullet } from './alien_bullet.js';
 import { createEnum } from './enum.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
-import { randomInt } from 'jus/math.js';
+import { randomInt } from 'jet/math.js';
 
 const MIN_ALIEN_FIRE_TIMEOUT_MS = 1000;
 const MAX_ALIEN_FIRE_TIMEOUT_MS = 5000;
@@ -26,8 +26,8 @@ export class Alien extends GameObject {
     /**
      * @param {Rectangle} envRect
      * @param {((b: import('./alien_bullet.js').AlienBullet) => void)} addBulletFn
-     * @param {import('jus/audio_file.js').AudioFile} laserSound
-     * @param {import('jus/audio_file.js').AudioFile} explosionSound
+     * @param {import('jet/audio_file.js').AudioFile} laserSound
+     * @param {import('jet/audio_file.js').AudioFile} explosionSound
      * @param {import('./image_file.js').ImageFile} ufoImg
      * @param {import('./image_file.js').ImageFile} explosionImg
      * @param {import('./image_file.js').ImageFile} bulletImg

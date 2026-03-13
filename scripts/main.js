@@ -1,16 +1,16 @@
 import { GameEngine } from './game_engine.js';
 import { GameObject } from './game_object.js';
-import { Vector2 } from 'jus/vector_2.js';
+import { Vector2 } from 'jet/vector_2.js';
 import { Camera } from './camera.js';
-import { Rectangle } from 'jus/rectangle.js';
+import { Rectangle } from 'jet/rectangle.js';
 import { ImageFile } from './image_file.js';
-import { removeItem } from 'jus/array.js';
+import { removeItem } from 'jet/array.js';
 import { Server } from './server.js';
 import { Player } from './player.js';
 import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
-import { AudioFile } from 'jus/audio_file.js';
+import { AudioFile } from 'jet/audio_file.js';
 import { SpriteFont, SpriteFontSource } from './sprite_font.js';
 import { Char } from './char.js';
 import {

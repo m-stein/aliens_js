@@ -1,10 +1,10 @@
 import { GameObject } from './game_object.js';
 import { Timeout } from './timeout.js';
-import { Vector2 } from 'jus/vector_2.js';
+import { Vector2 } from 'jet/vector_2.js';
 
 export class MainMenu extends GameObject {
     /**
-     * @param {import('jus/rectangle.js').Rectangle} rect
+     * @param {import('jet/rectangle.js').Rectangle} rect
      * @param {import('./sprite_font.js').SpriteFont} titleFont
      */
     constructor(rect, titleFont) {

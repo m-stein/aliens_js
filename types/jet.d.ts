@@ -1,4 +1,4 @@
-declare module 'jus/vector_2.js' {
+declare module "jet/vector_2.js" {
     export class Vector2 {
         /**
          * @param {number} x
@@ -50,7 +50,7 @@ declare module 'jus/vector_2.js' {
         toString(): string;
     }
 }
-declare module 'jus/math.js' {
+declare module "jet/math.js" {
     /**
      * @param {number} src
      * @param {number} dst
@@ -64,11 +64,7 @@ declare module 'jus/math.js' {
      * @param {number} factor
      * @returns {Vector2}
      */
-    export function lerpVec2(
-        src: Vector2,
-        dst: Vector2,
-        factor: number
-    ): Vector2;
+    export function lerpVec2(src: Vector2, dst: Vector2, factor: number): Vector2;
     /**
      * @param {Vector2} vec
      * @returns {Vector2}
@@ -86,24 +82,17 @@ declare module 'jus/math.js' {
      * @param {number} maxExclusive
      * @returns {number}
      */
-    export function randomInt(
-        minInclusive: number,
-        maxExclusive: number
-    ): number;
+    export function randomInt(minInclusive: number, maxExclusive: number): number;
     /**
      * @param {Vector2} coord
      * @param {number} matrixSize
      * @param {number} numRotations
      * @returns {Vector2}
      */
-    export function rotateQuadrMatrix2CoordClockwise(
-        coord: Vector2,
-        matrixSize: number,
-        numRotations: number
-    ): Vector2;
-    import { Vector2 } from 'jus/vector_2.js';
+    export function rotateQuadrMatrix2CoordClockwise(coord: Vector2, matrixSize: number, numRotations: number): Vector2;
+    import { Vector2 } from "jet/vector_2.js";
 }
-declare module 'jus/array.js' {
+declare module "jet/array.js" {
     /**
      * @template T
      * @param {T[]} array
@@ -128,10 +117,7 @@ declare module 'jus/array.js' {
      * @param {number} numItems
      * @returns {T[]}
      */
-    export function makeRandomSelection<T>(
-        availableItems: T[],
-        numItems: number
-    ): T[];
+    export function makeRandomSelection<T>(availableItems: T[], numItems: number): T[];
     /**
      * @template T
      * @param {T[]} array
@@ -139,25 +125,21 @@ declare module 'jus/array.js' {
      */
     export function lastItem<T>(array: T[]): T;
 }
-declare module 'jus/audio_file.js' {
+declare module "jet/audio_file.js" {
     export class AudioFile {
         /**
          * @param {Document} htmlDocument
          * @param {string} relPath
          * @param {(a: AudioFile) => void} onLoaded
          */
-        constructor(
-            htmlDocument: Document,
-            relPath: string,
-            onLoaded: (a: AudioFile) => void
-        );
+        constructor(htmlDocument: Document, relPath: string, onLoaded: (a: AudioFile) => void);
         relPath: string;
         onLoaded: (a: AudioFile) => void;
         htmlElement: HTMLAudioElement;
         onCanPlayThrough: () => void;
     }
 }
-declare module 'jus/json_file.js' {
+declare module "jet/json_file.js" {
     export class JsonFile {
         /**
          * @param {Document} htmlDocument
@@ -165,12 +147,7 @@ declare module 'jus/json_file.js' {
          * @param {string} relPath
          * @param {(file: JsonFile) => void} onLoaded
          */
-        constructor(
-            htmlDocument: Document,
-            jsonParser: JSON,
-            relPath: string,
-            onLoaded: (file: JsonFile) => void
-        );
+        constructor(htmlDocument: Document, jsonParser: JSON, relPath: string, onLoaded: (file: JsonFile) => void);
         _relPath: string;
         _onLoaded: (file: JsonFile) => void;
         _jsonParser: JSON;
@@ -185,7 +162,7 @@ declare module 'jus/json_file.js' {
         get data(): any;
     }
 }
-declare module 'jus/object_factory.js' {
+declare module "jet/object_factory.js" {
     /**
      * @typedef {{
      *   constructor: new (args: any) => any,
@@ -205,10 +182,7 @@ declare module 'jus/object_factory.js' {
          * @param {Record<string, string | number | boolean | null>} params
          * @returns {InstanceType<BlueprintDict[string]['constructor']>}
          */
-        createObj(
-            blueprintName: string,
-            params?: Record<string, string | number | boolean | null>
-        ): InstanceType<BlueprintDict[string]['constructor']>;
+        createObj(blueprintName: string, params?: Record<string, string | number | boolean | null>): InstanceType<BlueprintDict[string]["constructor"]>;
         /**
          * @param {{ class: string, params?: Record<string, any> }} json
          * @returns {InstanceType<BlueprintDict[string]['constructor']>}
@@ -216,7 +190,7 @@ declare module 'jus/object_factory.js' {
         createObjFromJson(json: {
             class: string;
             params?: Record<string, any>;
-        }): InstanceType<BlueprintDict[string]['constructor']>;
+        }): InstanceType<BlueprintDict[string]["constructor"]>;
     }
     export type Blueprint = {
         constructor: new (args: any) => any;
@@ -224,7 +198,7 @@ declare module 'jus/object_factory.js' {
     };
     export type BlueprintDict = Record<string, Blueprint>;
 }
-declare module 'jus/rectangle.js' {
+declare module "jet/rectangle.js" {
     export class Rectangle {
         /**
          * @param {Vector2} position
@@ -267,5 +241,5 @@ declare module 'jus/rectangle.js' {
          */
         bottomCenter(): Vector2;
     }
-    import { Vector2 } from 'jus/vector_2.js';
+    import { Vector2 } from "jet/vector_2.js";
 }

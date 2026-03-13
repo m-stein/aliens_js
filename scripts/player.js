@@ -1,6 +1,6 @@
 import { GameObject } from './game_object.js';
-import { Vector2 } from 'jus/vector_2.js';
-import { Rectangle } from 'jus/rectangle.js';
+import { Vector2 } from 'jet/vector_2.js';
+import { Rectangle } from 'jet/rectangle.js';
 import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
 import { createEnum } from './enum.js';

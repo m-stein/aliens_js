@@ -1,17 +1,17 @@
-import { getRandomItem } from 'jus/array.js';
+import { getRandomItem } from 'jet/array.js';
 import { Asteroid } from './asteroid.js';
 import { GameObject } from './game_object.js';
-import { randomInt } from 'jus/math.js';
+import { randomInt } from 'jet/math.js';
 import { Timeout } from './timeout.js';
-import { Vector2 } from 'jus/vector_2.js';
+import { Vector2 } from 'jet/vector_2.js';
 
 export class AsteroidWave extends GameObject {
     /**
      * @param {{
-     *   dstRect: import('jus/rectangle.js').Rectangle,
+     *   dstRect: import('jet/rectangle.js').Rectangle,
      *   asteroidParams: {
      *      image: import('./image_file.js').ImageFile,
-     *      collider: import('jus/rectangle.js').Rectangle,
+     *      collider: import('jet/rectangle.js').Rectangle,
      *   }[],
      *   minSpawnTimeoutMs: number,
      *   maxSpawnTimeoutMs: number

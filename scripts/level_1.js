@@ -1,20 +1,20 @@
 import { AlienWave } from './alien_wave.js';
 import { AsteroidWave } from './asteroid_wave.js';
 import { GameObject } from './game_object.js';
-import { Vector2 } from 'jus/vector_2.js';
+import { Vector2 } from 'jet/vector_2.js';
 
 export class Level1 extends GameObject {
     /**
      * @param {{
-     *   dstRect: import('jus/rectangle.js').Rectangle,
-     *   alienLaserSfx: import('jus/audio_file.js').AudioFile,
-     *   alienExplosionSfx: import('jus/audio_file.js').AudioFile,
+     *   dstRect: import('jet/rectangle.js').Rectangle,
+     *   alienLaserSfx: import('jet/audio_file.js').AudioFile,
+     *   alienExplosionSfx: import('jet/audio_file.js').AudioFile,
      *   alienImg: import('./image_file.js').ImageFile,
      *   explosionImg: import('./image_file.js').ImageFile,
      *   alienBulletImg: import('./image_file.js').ImageFile
      *   asteroidParams: {
      *      image: import('./image_file.js').ImageFile,
-     *      collider: import('jus/rectangle.js').Rectangle,
+     *      collider: import('jet/rectangle.js').Rectangle,
      *   }[],
      * }} args,
      */

@@ -1,15 +1,15 @@
 import { GameObject } from './game_object.js';
-import { Rectangle } from 'jus/rectangle.js';
-import { Vector2 } from 'jus/vector_2.js';
+import { Rectangle } from 'jet/rectangle.js';
+import { Vector2 } from 'jet/vector_2.js';
 
 export class Sprite extends GameObject {
     /**
      * @param {import('./image_file.js').ImageFile} image
-     * @param {import('jus/vector_2.js').Vector2=} frameSize
+     * @param {import('jet/vector_2.js').Vector2=} frameSize
      * @param {number=} numColumns
      * @param {number=} numRows
      * @param {number=} atFrameIdx
-     * @param {import('jus/vector_2.js').Vector2} framePadding
+     * @param {import('jet/vector_2.js').Vector2} framePadding
      */
     constructor(
         image,
