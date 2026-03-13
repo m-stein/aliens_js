@@ -1,36 +1,156 @@
-/**
- * This file originates from the Jus game engine.
- *
- * If you want to use Jus in your JavaScript project, the file can provide the
- * public interface of Jus to your type server, thereby enabling type checking,
- * import checking, and code completion. Just copy the correct version of this
- * file to the types/ sub-directory in your project directory and make sure to
- * add it to the "include" array in your jsconfig.json file.
- */
-declare module 'jus' {
-    export type BlueprintParams = Record<
-        string,
-        string | number | boolean | null
-    >;
+declare module "jus/json_file" {
+    export class JsonFile {
+        /**
+         * @param {Document} htmlDocument
+         * @param {JSON} jsonParser
+         * @param {string} relPath
+         * @param {(file: JsonFile) => void} onLoaded
+         */
+        constructor(htmlDocument: Document, jsonParser: JSON, relPath: string, onLoaded: (file: JsonFile) => void);
+        _relPath: string;
+        _onLoaded: (file: JsonFile) => void;
+        _jsonParser: JSON;
+        _httpRequest: XMLHttpRequest;
+        _url: URL;
+        /**
+         * @type {() => void}
+         * @private
+         */
+        private _onReadyStateChange;
+        _data: any;
+        get data(): any;
+    }
+}
+declare module "jus/object_factory" {
+    /**
+     * @typedef {{
+     *   constructor: new (args: any) => any,
+     *   context?: Record<string, any>
+     * }} Blueprint
+     * @typedef {Record<string, Blueprint>} BlueprintDict
+     */
+    export class ObjectFactory {
+        /**
+         * @param {Blueprint[]} blueprintsArray
+         */
+        constructor(blueprintsArray: Blueprint[]);
+        /** @type {Record<string, Blueprint>} */
+        _blueprints: Record<string, Blueprint>;
+        /**
+         * @param {string} blueprintName
+         * @param {Record<string, string | number | boolean | null>} params
+         * @returns {InstanceType<BlueprintDict[string]['constructor']>}
+         */
+        createObj(blueprintName: string, params?: Record<string, string | number | boolean | null>): InstanceType<BlueprintDict[string]["constructor"]>;
+        /**
+         * @param {{ class: string, params?: Record<string, any> }} json
+         * @returns {InstanceType<BlueprintDict[string]['constructor']>}
+         */
+        createObjFromJson(json: {
+            class: string;
+            params?: Record<string, any>;
+        }): InstanceType<BlueprintDict[string]["constructor"]>;
+    }
     export type Blueprint = {
         constructor: new (args: any) => any;
         context?: Record<string, any>;
     };
-    export class ObjectFactory {
-        constructor(blueprintsArray: Blueprint[]);
-        createObj(blueprintName: string, params?: BlueprintParams): any;
-        createObjFromJson(json: {
-            class: string;
-            params?: Record<string, any>;
-        }): any;
+    export type BlueprintDict = Record<string, Blueprint>;
+}
+declare module "jus/vector_2" {
+    export class Vector2 {
+        /**
+         * @param {number} x
+         * @param {number} y
+         */
+        constructor(x: number, y: number);
+        x: number;
+        y: number;
+        /**
+         * @param {Vector2} other
+         * @returns {number}
+         */
+        distanceTo(other: Vector2): number;
+        /**
+         * @returns {Vector2}
+         */
+        copy(): Vector2;
+        /**
+         * @param {Vector2} other
+         * @returns {boolean}
+         */
+        equals(other: Vector2): boolean;
+        /**
+         * @param {Vector2} other
+         * @returns {Vector2}
+         */
+        add(other: Vector2): Vector2;
+        /**
+         * @param {number} factor
+         * @returns {Vector2}
+         */
+        scale(factor: number): Vector2;
+        /**
+         * @param {Vector2} other
+         * @returns {Vector2}
+         */
+        subtract(other: Vector2): Vector2;
+        /**
+         * @returns {number}
+         */
+        length(): number;
+        /**
+         * @returns {Vector2}
+         */
+        normalized(): Vector2;
+        /**
+         * @returns {string}
+         */
+        toString(): string;
     }
-    export class JsonFile {
-        constructor(
-            htmlDocument: Document,
-            jsonParser: JSON,
-            relPath: string,
-            onLoaded: (file: JsonFile) => void
-        );
-        get data(): any;
+}
+declare module "jus/rectangle" {
+    export class Rectangle {
+        /**
+         * @param {Vector2} position
+         * @param {number} width
+         * @param {number} height
+         */
+        constructor(position: Vector2, width: number, height: number);
+        position: Vector2;
+        width: number;
+        height: number;
+        center: Vector2;
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+        /**
+         * @param {Vector2} point
+         * @returns {boolean}
+         */
+        isInside(point: Vector2): boolean;
+        /**
+         * @param {Rectangle} other
+         * @returns {boolean}
+         */
+        intersectsWith(other: Rectangle): boolean;
+        /**
+         * @returns {Rectangle}
+         */
+        copy(): Rectangle;
+        /**
+         * @returns {string}
+         */
+        toString(): string;
+        /**
+         * @returns {Vector2}
+         */
+        bottomLeft(): Vector2;
+        /**
+         * @returns {Vector2}
+         */
+        bottomCenter(): Vector2;
     }
+    import { Vector2 } from "jus/vector_2";
 }
