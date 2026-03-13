@@ -119,6 +119,11 @@ export class Player extends GameObject {
         }
         if (direction.length() > 0) {
             let diff = direction.normalized().scale(this.speed * elapsedMs);
+            if (diff.y < 0) {
+                diff.y /= 1.2;
+            } else if (diff.y > 0) {
+                diff.y *= 1.2;
+            }
             this.position.add(diff);
             if (this.position.x < this.minX) {
                 this.position.x = this.minX;
