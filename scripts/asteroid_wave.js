@@ -8,10 +8,10 @@ import { Vector2 } from 'jus/vector_2.js';
 export class AsteroidWave extends GameObject {
     /**
      * @param {{
-     *   dstRect: import('./rectangle.js').Rectangle,
+     *   dstRect: import('jus/rectangle.js').Rectangle,
      *   asteroidParams: {
      *      image: import('./image_file.js').ImageFile,
-     *      collider: import('./rectangle.js').Rectangle,
+     *      collider: import('jus/rectangle.js').Rectangle,
      *   }[],
      *   minSpawnTimeoutMs: number,
      *   maxSpawnTimeoutMs: number

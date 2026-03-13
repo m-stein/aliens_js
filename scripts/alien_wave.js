@@ -7,7 +7,7 @@ import { Vector2 } from 'jus/vector_2.js';
 export class AlienWave extends GameObject {
     /**
      * @param {{
-     *   dstRect: import('./rectangle.js').Rectangle,
+     *   dstRect: import('jus/rectangle.js').Rectangle,
      *   alienLaserSfx: import('./audio_file.js').AudioFile,
      *   alienExplosionSfx: import('./audio_file.js').AudioFile,
      *   alienImg: import('./image_file.js').ImageFile,

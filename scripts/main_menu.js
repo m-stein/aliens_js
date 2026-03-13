@@ -4,7 +4,7 @@ import { Vector2 } from 'jus/vector_2.js';
 
 export class MainMenu extends GameObject {
     /**
-     * @param {import('./rectangle.js').Rectangle} rect
+     * @param {import('jus/rectangle.js').Rectangle} rect
      * @param {import('./sprite_font.js').SpriteFont} titleFont
      */
     constructor(rect, titleFont) {

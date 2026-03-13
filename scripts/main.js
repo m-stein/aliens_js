@@ -2,7 +2,7 @@ import { GameEngine } from './game_engine.js';
 import { GameObject } from './game_object.js';
 import { Vector2 } from 'jus/vector_2.js';
 import { Camera } from './camera.js';
-import { Rectangle } from './rectangle.js';
+import { Rectangle } from 'jus/rectangle.js';
 import { ImageFile } from './image_file.js';
 import { removeItem } from './array_utilities.js';
 import { Server } from './server.js';

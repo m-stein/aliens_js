@@ -1,5 +1,5 @@
 import { GameObject } from './game_object.js';
-import { Rectangle } from './rectangle.js';
+import { Rectangle } from 'jus/rectangle.js';
 import { Vector2 } from 'jus/vector_2.js';
 import { FONT_LINE_HEIGHT } from './parameters.js';
 

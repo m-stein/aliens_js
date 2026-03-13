@@ -2,7 +2,7 @@ import { GameObject } from './game_object.js';
 import { Vector2 } from 'jus/vector_2.js';
 import { Sprite } from './sprite.js';
 import { TimedValue } from './timed_value.js';
-import { Rectangle } from './rectangle.js';
+import { Rectangle } from 'jus/rectangle.js';
 import { AlienBullet } from './alien_bullet.js';
 import { createEnum } from './enum.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';

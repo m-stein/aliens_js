@@ -1,12 +1,12 @@
 import { GameObject } from './game_object.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
-import { Rectangle } from './rectangle.js';
+import { Rectangle } from 'jus/rectangle.js';
 import { Sprite } from './sprite.js';
 import { Vector2 } from 'jus/vector_2.js';
 
 export class Asteroid extends GameObject {
     /**
-     * @param {import('./rectangle.js').Rectangle} dstRect
+     * @param {import('jus/rectangle.js').Rectangle} dstRect
      * @param {import('./image_file.js').ImageFile} image
      * @param {Vector2} position
      * @param {Vector2} speed
