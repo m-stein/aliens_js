@@ -1,4 +1,4 @@
-import { removeItem } from './array_utilities.js';
+import { removeItem } from 'jus/array.js';
 import { DrawingContext } from './drawing_context.js';
 import { Vector2 } from 'jus/vector_2.js';
 

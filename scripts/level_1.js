@@ -7,8 +7,8 @@ export class Level1 extends GameObject {
     /**
      * @param {{
      *   dstRect: import('jus/rectangle.js').Rectangle,
-     *   alienLaserSfx: import('./audio_file.js').AudioFile,
-     *   alienExplosionSfx: import('./audio_file.js').AudioFile,
+     *   alienLaserSfx: import('jus/audio_file.js').AudioFile,
+     *   alienExplosionSfx: import('jus/audio_file.js').AudioFile,
      *   alienImg: import('./image_file.js').ImageFile,
      *   explosionImg: import('./image_file.js').ImageFile,
      *   alienBulletImg: import('./image_file.js').ImageFile

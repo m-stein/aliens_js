@@ -1,6 +1,6 @@
 import { Alien } from './alien.js';
 import { GameObject } from './game_object.js';
-import { randomInt } from './math.js';
+import { randomInt } from 'jus/math.js';
 import { Timeout } from './timeout.js';
 import { Vector2 } from 'jus/vector_2.js';
 
@@ -8,8 +8,8 @@ export class AlienWave extends GameObject {
     /**
      * @param {{
      *   dstRect: import('jus/rectangle.js').Rectangle,
-     *   alienLaserSfx: import('./audio_file.js').AudioFile,
-     *   alienExplosionSfx: import('./audio_file.js').AudioFile,
+     *   alienLaserSfx: import('jus/audio_file.js').AudioFile,
+     *   alienExplosionSfx: import('jus/audio_file.js').AudioFile,
      *   alienImg: import('./image_file.js').ImageFile,
      *   explosionImg: import('./image_file.js').ImageFile,
      *   alienBulletImg: import('./image_file.js').ImageFile

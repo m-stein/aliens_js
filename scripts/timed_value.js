@@ -1,4 +1,4 @@
-import { randomInt } from './math.js';
+import { randomInt } from 'jus/math.js';
 
 export class TimedValue {
     constructor(phases) {

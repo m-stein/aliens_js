@@ -2,7 +2,7 @@ import { GameObject } from './game_object.js';
 import { Rectangle } from 'jus/rectangle.js';
 import { DrawingContext } from './drawing_context.js';
 import { Vector2 } from 'jus/vector_2.js';
-import { clamp, randomInt } from './math.js';
+import { clamp, randomInt } from 'jus/math.js';
 
 export class Stars extends GameObject {
     constructor(brightness, speed, rect, numStars, htmlDocument) {

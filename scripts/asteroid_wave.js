@@ -1,7 +1,7 @@
-import { getRandomItem } from './array_utilities.js';
+import { getRandomItem } from 'jus/array.js';
 import { Asteroid } from './asteroid.js';
 import { GameObject } from './game_object.js';
-import { randomInt } from './math.js';
+import { randomInt } from 'jus/math.js';
 import { Timeout } from './timeout.js';
 import { Vector2 } from 'jus/vector_2.js';
 
