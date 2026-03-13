@@ -31,6 +31,29 @@ export class AlienWave extends GameObject {
         this._numAliensSpawned = 0;
         this._onAlienSpawned = args.onAlienSpawned;
 
+        const alienWidth = 32;
+        this._maxCurveAmplFactor = args.dstRect.width / 2 - alienWidth / 2;
+        this._ySpeed = 0;
+        this._curveFreqFactor = 0;
+        this._curveVerticalShift = 0;
+        this._curveAmplFactor = 0;
+
+        this._burstMaxCount = 5;
+        this._burstIntervalMs = 300;
+        this._burstActive = false;
+        this._burstCount = 0;
+        this._burstTimeout = new Timeout(this._burstIntervalMs, () => {
+            if (this._burstActive) {
+                this._spawnAlien();
+                this._burstCount++;
+                if (this._burstCount >= this._burstMaxCount) {
+                    this._deactivateBurst();
+                }
+            }
+            this._burstTimeout.set(this._burstIntervalMs);
+        });
+        this.addChild(this._burstTimeout);
+
         /** @type {Alien[]} */
         this._aliens = [];
 
@@ -40,9 +63,19 @@ export class AlienWave extends GameObject {
         this._dstRect = args.dstRect;
         this._spawnTimeout = new Timeout(
             this._newSpawnTimeoutMs(),
-            this._spawnAlien
+            this._activateBurst
         );
         this.addChild(this._spawnTimeout);
+    }
+
+    _setNewAlienMovementParams() {
+        this._ySpeed = randomInt(20.0, 60.0) / 1000;
+        this._curveFreqFactor = 1 / (this._ySpeed * 1000);
+        this._curveVerticalShift = randomInt(0, 360);
+        this._curveAmplFactor = randomInt(
+            this._maxCurveAmplFactor / 2,
+            this._maxCurveAmplFactor
+        );
     }
 
     /**
@@ -86,6 +119,17 @@ export class AlienWave extends GameObject {
         }
     }
 
+    _activateBurst = () => {
+        this._setNewAlienMovementParams();
+        this._burstActive = true;
+        this._burstCount = 0;
+        this._spawnTimeout.set(this._newSpawnTimeoutMs());
+    };
+
+    _deactivateBurst = () => {
+        this._burstActive = false;
+    };
+
     _spawnAlien = () => {
         const alien = new Alien(
             this._dstRect,
@@ -97,13 +141,14 @@ export class AlienWave extends GameObject {
             this._alienExplosionSfx,
             this._alienImg,
             this._explosionImg,
-            this._alienBulletImg
+            this._alienBulletImg,
+            this._ySpeed,
+            this._curveFreqFactor,
+            this._curveVerticalShift,
+            this._curveAmplFactor
         );
         this._aliens.push(alien);
         this.addChild(alien);
-        this._numAliensSpawned++;
-        this._onAlienSpawned(this._numAliensSpawned);
-        this._spawnTimeout.set(this._newSpawnTimeoutMs());
     };
 
     /**

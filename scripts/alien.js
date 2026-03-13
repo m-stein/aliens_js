@@ -31,6 +31,11 @@ export class Alien extends GameObject {
      * @param {import('./image_file.js').ImageFile} ufoImg
      * @param {import('./image_file.js').ImageFile} explosionImg
      * @param {import('./image_file.js').ImageFile} bulletImg
+     * @param {number} ySpeed
+     * @param {number} curveFreqFactor
+     * @param {number} curveVerticalShift
+     * @param {number} curveVerticalShift
+     * @param {number} curveAmplFactor
      */
     constructor(
         envRect,
@@ -39,15 +44,19 @@ export class Alien extends GameObject {
         explosionSound,
         ufoImg,
         explosionImg,
-        bulletImg
+        bulletImg,
+        ySpeed,
+        curveFreqFactor,
+        curveVerticalShift,
+        curveAmplFactor
     ) {
         super(new Vector2(0, 0), 'Alien');
 
-        this._ySpeed = 0;
-        this._curveFreqFactor = 0;
+        this._ySpeed = ySpeed;
+        this._curveFreqFactor = curveFreqFactor;
+        this._curveAmplFactor = curveAmplFactor;
+        this._curveVerticalShift = curveVerticalShift;
         this._fireTimeout = 0;
-        this._curveAmplFactor = 0;
-        this._curveVerticalShift = 0;
 
         /** @type {((a: Alien) => void)} */
         this.explosionFinishedFn = (_a) => {};
@@ -95,10 +104,6 @@ export class Alien extends GameObject {
 
         this._bulletImg = bulletImg;
         this._laserSound = laserSound;
-
-        this._maxCurveAmplFactor =
-            this._envRect.width / 2 - this._ufoSprite.frameWidth() / 2;
-
         this._curveHorizontalShift =
             -this._ufoSprite.frameWidth() / 2 + this._envRect.width / 2;
 
@@ -111,13 +116,6 @@ export class Alien extends GameObject {
 
     respawn() {
         this._fireTimeout = Alien._newFireTimeout();
-        this._ySpeed = randomInt(20.0, 60.0) / 1000;
-        this._curveFreqFactor = 1 / (this._ySpeed * 1000);
-        this._curveVerticalShift = randomInt(0, 360);
-        this._curveAmplFactor = randomInt(
-            this._maxCurveAmplFactor / 2,
-            this._maxCurveAmplFactor
-        );
         this.position = new Vector2(0, -32);
         this._updatePosition(0);
         switch (this._state) {

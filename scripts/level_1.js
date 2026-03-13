@@ -29,17 +29,18 @@ export class Level1 extends GameObject {
         this.addChild(this._asteroidWave);
         this._alienWave = new AlienWave({
             ...args,
-            minSpawnTimeoutMs: 2000,
-            maxSpawnTimeoutMs: 3000,
+            minSpawnTimeoutMs: 4000,
+            maxSpawnTimeoutMs: 6000,
             onAlienSpawned: this._onAlienSpawned,
         });
         this.addChild(this._alienWave);
     }
 
     /**
-     * @param {number} numAliensSpawned
+     * @param {number} _numAliensSpawned
      */
-    _onAlienSpawned = (numAliensSpawned) => {
+    _onAlienSpawned = (_numAliensSpawned) => {
+        /*
         switch (numAliensSpawned) {
             case 5: // +5
                 this._alienWave.changeConfig(1800, 2800);
@@ -69,6 +70,7 @@ export class Level1 extends GameObject {
                 this._alienWave.changeConfig(200, 1200);
                 break;
         }
+                */
     };
 
     /**
