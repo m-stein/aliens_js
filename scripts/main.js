@@ -12,7 +12,7 @@ import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
 import { AudioFile } from 'jet/audio_file.js';
 import { SpriteFont, SpriteFontSource } from './sprite_font.js';
-import { Char } from './char.js';
+import { charRange } from 'jet/char.js';
 import {
     SCORE_BONUS_DECR_PER_MISS,
     SCORE_BONUS_DIV_PER_DEATH,
@@ -321,9 +321,9 @@ class Main extends GameObject {
             this.assets.images.font,
             new Vector2(9, 9),
             new Map([
-                [new Vector2(32, 0), Char.range('A', 'Z')],
-                [new Vector2(64, 0), Char.range('a', 'z')],
-                [new Vector2(15, 0), Char.range('0', '9')],
+                [new Vector2(32, 0), charRange('A', 'Z')],
+                [new Vector2(64, 0), charRange('a', 'z')],
+                [new Vector2(15, 0), charRange('0', '9')],
                 [new Vector2(25, 0), [':']],
                 [new Vector2(0, 0), ['!']],
             ])
