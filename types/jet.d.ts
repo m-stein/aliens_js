@@ -165,6 +165,93 @@ declare module 'jet/char.js' {
      */
     export function charRange(start: string, end: string): string[];
 }
+declare module 'jet/rectangle.js' {
+    export class Rectangle {
+        /**
+         * @param {Vector2} position
+         * @param {number} width
+         * @param {number} height
+         */
+        constructor(position: Vector2, width: number, height: number);
+        position: Vector2;
+        width: number;
+        height: number;
+        center: Vector2;
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+        /**
+         * @param {Vector2} point
+         * @returns {boolean}
+         */
+        isInside(point: Vector2): boolean;
+        /**
+         * @param {Rectangle} other
+         * @returns {boolean}
+         */
+        intersectsWith(other: Rectangle): boolean;
+        /**
+         * @returns {Rectangle}
+         */
+        copy(): Rectangle;
+        /**
+         * @returns {string}
+         */
+        toString(): string;
+        /**
+         * @returns {Vector2}
+         */
+        bottomLeft(): Vector2;
+        /**
+         * @returns {Vector2}
+         */
+        bottomCenter(): Vector2;
+    }
+    import { Vector2 } from 'jet/vector_2.js';
+}
+declare module 'jet/drawing_context.js' {
+    export class DrawingContext {
+        /**
+         * @param {HTMLCanvasElement} canvas
+         */
+        constructor(canvas: HTMLCanvasElement);
+        canvas: HTMLCanvasElement;
+        canvasContext: CanvasRenderingContext2D;
+        position: Vector2;
+        /**
+         * @param {HTMLImageElement} image
+         * @param {import('./rectangle.js').Rectangle} srcRect
+         * @param {import('./rectangle.js').Rectangle} dstRect
+         */
+        drawImage(
+            image: HTMLImageElement,
+            srcRect: import('jet/rectangle.js').Rectangle,
+            dstRect: import('jet/rectangle.js').Rectangle
+        ): void;
+        /**
+         * @param {string} text
+         * @param {Vector2} position
+         * @param {number} size
+         * @param {CanvasTextAlign} alignment
+         */
+        drawText(
+            text: string,
+            position: Vector2,
+            size: number,
+            alignment: CanvasTextAlign
+        ): void;
+        /**
+         * @param {import('./rectangle.js').Rectangle} rect
+         * @param {string} color
+         */
+        drawRect(
+            rect: import('jet/rectangle.js').Rectangle,
+            color: string
+        ): void;
+    }
+    import { Vector2 } from 'jet/vector_2.js';
+}
 declare module 'jet/json_file.js' {
     export class JsonFile {
         /**
@@ -231,49 +318,4 @@ declare module 'jet/object_factory.js' {
         context?: Record<string, any>;
     };
     export type BlueprintDict = Record<string, Blueprint>;
-}
-declare module 'jet/rectangle.js' {
-    export class Rectangle {
-        /**
-         * @param {Vector2} position
-         * @param {number} width
-         * @param {number} height
-         */
-        constructor(position: Vector2, width: number, height: number);
-        position: Vector2;
-        width: number;
-        height: number;
-        center: Vector2;
-        left: number;
-        right: number;
-        top: number;
-        bottom: number;
-        /**
-         * @param {Vector2} point
-         * @returns {boolean}
-         */
-        isInside(point: Vector2): boolean;
-        /**
-         * @param {Rectangle} other
-         * @returns {boolean}
-         */
-        intersectsWith(other: Rectangle): boolean;
-        /**
-         * @returns {Rectangle}
-         */
-        copy(): Rectangle;
-        /**
-         * @returns {string}
-         */
-        toString(): string;
-        /**
-         * @returns {Vector2}
-         */
-        bottomLeft(): Vector2;
-        /**
-         * @returns {Vector2}
-         */
-        bottomCenter(): Vector2;
-    }
-    import { Vector2 } from 'jet/vector_2.js';
 }

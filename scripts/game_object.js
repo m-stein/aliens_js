@@ -1,5 +1,5 @@
 import { removeItem } from 'jet/array.js';
-import { DrawingContext } from './drawing_context.js';
+import { DrawingContext } from 'jet/drawing_context.js';
 import { Vector2 } from 'jet/vector_2.js';
 
 export class GameObject {

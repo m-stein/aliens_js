@@ -1,4 +1,4 @@
-import { DrawingContext } from './drawing_context.js';
+import { DrawingContext } from 'jet/drawing_context.js';
 
 export class GameEngine {
     constructor({ rootGameObj, camera, canvas, updatePeriodMs }) {

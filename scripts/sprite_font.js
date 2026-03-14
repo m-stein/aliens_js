@@ -59,7 +59,7 @@ export class SpriteFont {
     }
 
     /**
-     * @param {import('./drawing_context.js').DrawingContext} drawingContext
+     * @param {import('jet/drawing_context.js').DrawingContext} drawingContext
      * @param {Vector2} position
      * @param {string} c
      */
@@ -82,7 +82,7 @@ export class SpriteFont {
     }
 
     /**
-     * @param {import('./drawing_context.js').DrawingContext} drawingContext
+     * @param {import('jet/drawing_context.js').DrawingContext} drawingContext
      * @param {Vector2} position
      * @param {string} str
      */
