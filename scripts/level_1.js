@@ -1,6 +1,6 @@
 import { AlienWave } from './alien_wave.js';
 import { AsteroidWave } from './asteroid_wave.js';
-import { GameObject } from './game_object.js';
+import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
 
 export class Level1 extends GameObject {

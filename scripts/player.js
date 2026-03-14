@@ -1,4 +1,4 @@
-import { GameObject } from './game_object.js';
+import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
 import { Rectangle } from 'jet/rectangle.js';
 import { Sprite } from './sprite.js';

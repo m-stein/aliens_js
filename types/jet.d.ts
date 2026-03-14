@@ -252,6 +252,50 @@ declare module 'jet/drawing_context.js' {
     }
     import { Vector2 } from 'jet/vector_2.js';
 }
+declare module 'jet/game_object.js' {
+    export class GameObject {
+        /**
+         * @param {import('./vector_2.js').Vector2} position
+         * @param {string} label
+         */
+        constructor(position: import('jet/vector_2.js').Vector2, label: string);
+        _label: string;
+        position: import('jet/vector_2.js').Vector2;
+        /** @type {GameObject[]} */
+        _children: GameObject[];
+        /**
+         * @param {GameObject} child
+         * @param {number | null} index
+         */
+        addChild(child: GameObject, index?: number | null): void;
+        /**
+         * @param {GameObject} child
+         */
+        removeChild(child: GameObject): void;
+        /**
+         * @param {number} elapsedMs
+         */
+        updateChildren(elapsedMs: number): void;
+        /**
+         * @param {import('./drawing_context.js').DrawingContext} drawingContext
+         */
+        drawChildren(
+            drawingContext: import('jet/drawing_context.js').DrawingContext
+        ): void;
+        /**
+         * @abstract
+         * @param {number} _elapsedMs
+         */
+        update(_elapsedMs: number): void;
+        /**
+         * @abstract
+         * @param {import('./drawing_context.js').DrawingContext} _drawingContext
+         */
+        draw(
+            _drawingContext: import('jet/drawing_context.js').DrawingContext
+        ): void;
+    }
+}
 declare module 'jet/json_file.js' {
     export class JsonFile {
         /**

@@ -1,5 +1,5 @@
 import { Alien } from './alien.js';
-import { GameObject } from './game_object.js';
+import { GameObject } from 'jet/game_object.js';
 import { randomInt } from 'jet/math.js';
 import { Timeout } from './timeout.js';
 import { Vector2 } from 'jet/vector_2.js';

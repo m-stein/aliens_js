@@ -1,4 +1,4 @@
-import { GameObject } from './game_object.js';
+import { GameObject } from 'jet/game_object.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 import { Rectangle } from 'jet/rectangle.js';
 import { Sprite } from './sprite.js';
