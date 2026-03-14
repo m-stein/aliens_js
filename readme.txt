@@ -31,4 +31,4 @@ Live Server for quick testruns (VS Code)
 
 ### Fetch newest type declaration files of dependency libs before committing changes
 
-    npm run fetchDependencyDtsFiles
+    npm run fetchDtsFiles

@@ -6,7 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "lint": "eslint .",
-        "fetchDependencyDtsFiles": "curl -L https://raw.githubusercontent.com/m-stein/jet/main/types/jet.d.ts -o types/jet.d.ts"
+        "fetchDtsFiles": "curl -L https://raw.githubusercontent.com/m-stein/jet/main/types/jet.d.ts -o types/jet.d.ts"
     },
     "keywords": [],
     "author": "",
