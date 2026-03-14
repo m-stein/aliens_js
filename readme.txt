@@ -22,3 +22,13 @@ Live Server for quick testruns (VS Code)
             }
         }
     > npm run dev
+
+## Development
+
+### Initialize for development
+
+    npm install
+
+### Fetch newest type declaration files of dependency libs before committing changes
+
+    npm run fetchDependencyDtsFiles
