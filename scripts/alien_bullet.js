@@ -9,7 +9,7 @@ export class AlienBullet extends GameObject {
     /**
      * @param {Vector2} rifleTip
      * @param {number} fbHeight
-     * @param {import('./image_file.js').ImageFile} image
+     * @param {import('jet/image_file.js').ImageFile} image
      */
     constructor(rifleTip, fbHeight, image) {
         super(rifleTip.copy(), 'AlienBullet');

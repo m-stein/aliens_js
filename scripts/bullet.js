@@ -7,7 +7,7 @@ import { Vector2 } from 'jet/vector_2.js';
 export class Bullet extends GameObject {
     /**
      * @param {Vector2} rifleTip
-     * @param {import('./image_file.js').ImageFile} image
+     * @param {import('jet/image_file.js').ImageFile} image
      */
     constructor(rifleTip, image) {
         let size = new Vector2(3, 7);

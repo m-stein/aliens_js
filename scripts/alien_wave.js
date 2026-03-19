@@ -10,9 +10,9 @@ export class AlienWave extends GameObject {
      *   dstRect: import('jet/rectangle.js').Rectangle,
      *   alienLaserSfx: import('jet/audio_file.js').AudioFile,
      *   alienExplosionSfx: import('jet/audio_file.js').AudioFile,
-     *   alienImg: import('./image_file.js').ImageFile,
-     *   explosionImg: import('./image_file.js').ImageFile,
-     *   alienBulletImg: import('./image_file.js').ImageFile
+     *   alienImg: import('jet/image_file.js').ImageFile,
+     *   explosionImg: import('jet/image_file.js').ImageFile,
+     *   alienBulletImg: import('jet/image_file.js').ImageFile
      *   minSpawnTimeoutMs: number,
      *   maxSpawnTimeoutMs: number
      *   onAlienSpawned: (numAliensSpawned: number) => void

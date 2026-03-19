@@ -28,9 +28,9 @@ export class Alien extends GameObject {
      * @param {((b: import('./alien_bullet.js').AlienBullet) => void)} addBulletFn
      * @param {import('jet/audio_file.js').AudioFile} laserSound
      * @param {import('jet/audio_file.js').AudioFile} explosionSound
-     * @param {import('./image_file.js').ImageFile} ufoImg
-     * @param {import('./image_file.js').ImageFile} explosionImg
-     * @param {import('./image_file.js').ImageFile} bulletImg
+     * @param {import('jet/image_file.js').ImageFile} ufoImg
+     * @param {import('jet/image_file.js').ImageFile} explosionImg
+     * @param {import('jet/image_file.js').ImageFile} bulletImg
      * @param {number} ySpeed
      * @param {number} curveFreqFactor
      * @param {number} curveVerticalShift

@@ -10,7 +10,7 @@ export class AsteroidWave extends GameObject {
      * @param {{
      *   dstRect: import('jet/rectangle.js').Rectangle,
      *   asteroidParams: {
-     *      image: import('./image_file.js').ImageFile,
+     *      image: import('jet/image_file.js').ImageFile,
      *      collider: import('jet/rectangle.js').Rectangle,
      *   }[],
      *   minSpawnTimeoutMs: number,

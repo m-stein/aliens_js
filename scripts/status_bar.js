@@ -18,10 +18,10 @@ export class StatusBar extends GameObject {
     /**
      * @param {Vector2} position
      * @param {number} width
-     * @param {import('./sprite_font.js').SpriteFont} font
+     * @param {import('jet/sprite_font.js').SpriteFont} font
      * @param {number} score
      * @param {number} bonus
-     * @param {import('./image_file.js').ImageFile} liveImg
+     * @param {import('jet/image_file.js').ImageFile} liveImg
      */
     constructor(position, width, font, score, bonus, liveImg) {
         super(new Vector2(0, 0), 'StatusBar');

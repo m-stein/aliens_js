@@ -3,7 +3,7 @@ import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
 import { Camera } from './camera.js';
 import { Rectangle } from 'jet/rectangle.js';
-import { ImageFile } from './image_file.js';
+import { ImageFile } from 'jet/image_file.js';
 import { removeItem } from 'jet/array.js';
 import { Server } from './server.js';
 import { Player } from './player.js';
@@ -11,7 +11,7 @@ import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
 import { AudioFile } from 'jet/audio_file.js';
-import { SpriteFont, SpriteFontSource } from './sprite_font.js';
+import { SpriteFont, SpriteFontSource } from 'jet/sprite_font.js';
 import { charRange } from 'jet/char.js';
 import {
     SCORE_BONUS_DECR_PER_MISS,

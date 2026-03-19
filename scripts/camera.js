@@ -4,7 +4,7 @@ import { Vector2 } from 'jet/vector_2.js';
 
 export class Camera extends GameObject {
     /**
-     * @param {import('./image_file.js').ImageFile} backgroundImg
+     * @param {import('jet/image_file.js').ImageFile} backgroundImg
      * @param {number} width
      * @param {number} height
      */

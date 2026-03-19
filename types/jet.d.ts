@@ -296,6 +296,23 @@ declare module 'jet/game_object.js' {
         ): void;
     }
 }
+declare module 'jet/image_file.js' {
+    export class ImageFile {
+        /**
+         * @param {Document} htmlDocument
+         * @param {string} relPath
+         * @param {(a: ImageFile) => void} onLoaded
+         */
+        constructor(
+            htmlDocument: Document,
+            relPath: string,
+            onLoaded: (a: ImageFile) => void
+        );
+        relPath: string;
+        onLoaded: (a: ImageFile) => void;
+        htmlElement: HTMLImageElement;
+    }
+}
 declare module 'jet/json_file.js' {
     export class JsonFile {
         /**
@@ -363,3 +380,66 @@ declare module 'jet/object_factory.js' {
     };
     export type BlueprintDict = Record<string, Blueprint>;
 }
+declare module 'jet/sprite_font.js' {
+    export class SpriteFontSource {
+        /**
+         * @param {import('jet/image_file.js').ImageFile} image
+         * @param {Vector2} charSize
+         * @param {Map<Vector2, string[]>} chars
+         */
+        constructor(
+            image: import('jet/image_file.js').ImageFile,
+            charSize: Vector2,
+            chars: Map<Vector2, string[]>
+        );
+        image: import('jet/image_file.js').ImageFile;
+        charSize: Vector2;
+        /** @type {Map<string, Vector2>} */
+        charPositions: Map<string, Vector2>;
+    }
+    export class SpriteFont {
+        /**
+         * @param {SpriteFontSource} src
+         * @param {number} yShift
+         * @param {number} scalingFactor
+         */
+        constructor(
+            src: SpriteFontSource,
+            yShift: number,
+            scalingFactor?: number
+        );
+        _src: SpriteFontSource;
+        _yShift: number;
+        _dstCharSize: Vector2;
+        /**
+         * @returns {number}
+         */
+        charWidth(): number;
+        /**
+         * @returns {number}
+         */
+        lineHeight(): number;
+        /**
+         * @param {import('./drawing_context.js').DrawingContext} drawingContext
+         * @param {Vector2} position
+         * @param {string} c
+         */
+        drawChar(
+            drawingContext: import('jet/drawing_context.js').DrawingContext,
+            position: Vector2,
+            c: string
+        ): void;
+        /**
+         * @param {import('./drawing_context.js').DrawingContext} drawingContext
+         * @param {Vector2} position
+         * @param {string} str
+         */
+        drawString(
+            drawingContext: import('jet/drawing_context.js').DrawingContext,
+            position: Vector2,
+            str: string
+        ): void;
+    }
+    import { Vector2 } from 'jet/vector_2.js';
+}
+

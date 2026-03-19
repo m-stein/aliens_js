@@ -2,7 +2,7 @@ import { Vector2 } from 'jet/vector_2.js';
 
 export class SpriteFontSource {
     /**
-     * @param {import('./image_file.js').ImageFile} image
+     * @param {import('jet/image_file.js').ImageFile} image
      * @param {Vector2} charSize
      * @param {Map<Vector2, string[]>} chars
      */

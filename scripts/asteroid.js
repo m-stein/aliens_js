@@ -7,7 +7,7 @@ import { Vector2 } from 'jet/vector_2.js';
 export class Asteroid extends GameObject {
     /**
      * @param {import('jet/rectangle.js').Rectangle} dstRect
-     * @param {import('./image_file.js').ImageFile} image
+     * @param {import('jet/image_file.js').ImageFile} image
      * @param {Vector2} position
      * @param {Vector2} speed
      * @param {Rectangle} collider

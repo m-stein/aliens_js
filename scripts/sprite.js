@@ -4,7 +4,7 @@ import { Vector2 } from 'jet/vector_2.js';
 
 export class Sprite extends GameObject {
     /**
-     * @param {import('./image_file.js').ImageFile} image
+     * @param {import('jet/image_file.js').ImageFile} image
      * @param {import('jet/vector_2.js').Vector2=} frameSize
      * @param {number=} numColumns
      * @param {number=} numRows

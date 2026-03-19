@@ -9,11 +9,11 @@ export class Level1 extends GameObject {
      *   dstRect: import('jet/rectangle.js').Rectangle,
      *   alienLaserSfx: import('jet/audio_file.js').AudioFile,
      *   alienExplosionSfx: import('jet/audio_file.js').AudioFile,
-     *   alienImg: import('./image_file.js').ImageFile,
-     *   explosionImg: import('./image_file.js').ImageFile,
-     *   alienBulletImg: import('./image_file.js').ImageFile
+     *   alienImg: import('jet/image_file.js').ImageFile,
+     *   explosionImg: import('jet/image_file.js').ImageFile,
+     *   alienBulletImg: import('jet/image_file.js').ImageFile
      *   asteroidParams: {
-     *      image: import('./image_file.js').ImageFile,
+     *      image: import('jet/image_file.js').ImageFile,
      *      collider: import('jet/rectangle.js').Rectangle,
      *   }[],
      * }} args,

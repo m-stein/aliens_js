@@ -5,7 +5,7 @@ import { Vector2 } from 'jet/vector_2.js';
 export class MainMenu extends GameObject {
     /**
      * @param {import('jet/rectangle.js').Rectangle} rect
-     * @param {import('./sprite_font.js').SpriteFont} titleFont
+     * @param {import('jet/sprite_font.js').SpriteFont} titleFont
      */
     constructor(rect, titleFont) {
         super(new Vector2(0, 0), 'MainMenu');
