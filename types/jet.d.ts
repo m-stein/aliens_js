@@ -252,16 +252,6 @@ declare module 'jet/drawing_context.js' {
     }
     import { Vector2 } from 'jet/vector_2.js';
 }
-declare module 'jet/enum.js' {
-    /**
-     * @template {Record<string, number>} T
-     * @param {T} baseEnum
-     * @returns {{ readonly [K in keyof T]: T[K] }}
-     */
-    export function createEnum<T extends Record<string, number>>(
-        baseEnum: T
-    ): { readonly [K in keyof T]: T[K] };
-}
 declare module 'jet/game_object.js' {
     export class GameObject {
         /**
@@ -311,6 +301,22 @@ declare module 'jet/game_object.js' {
             _drawingContext: import('jet/drawing_context.js').DrawingContext
         ): void;
     }
+}
+declare module 'jet/container.js' {
+    export class Container extends GameObject {
+        constructor();
+    }
+    import { GameObject } from 'jet/game_object.js';
+}
+declare module 'jet/enum.js' {
+    /**
+     * @template {Record<string, number>} T
+     * @param {T} baseEnum
+     * @returns {{ readonly [K in keyof T]: T[K] }}
+     */
+    export function createEnum<T extends Record<string, number>>(
+        baseEnum: T
+    ): { readonly [K in keyof T]: T[K] };
 }
 declare module 'jet/game_engine.js' {
     export class GameEngine {
