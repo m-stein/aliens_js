@@ -10,19 +10,26 @@ export class AlienBullet extends GameObject {
      * @param {Vector2} rifleTip
      * @param {number} fbHeight
      * @param {import('jet/image_file.js').ImageFile} image
+     * @param {Vector2} heading
+     * @param {number} speed
      */
-    constructor(rifleTip, fbHeight, image) {
+    constructor(
+        rifleTip,
+        fbHeight,
+        image,
+        heading = new Vector2(0, 1),
+        speed = 200 / 1000
+    ) {
         super(rifleTip.copy(), 'AlienBullet');
         this._width = 8;
         this._height = 8;
         this._fbHeight = fbHeight;
+        this._speed = heading.copy().scale(speed);
 
         this.position = new Vector2(
             rifleTip.x - this._width / 2,
             rifleTip.y - this._height
         );
-
-        this._speed = 200.0 / 1000;
 
         this._colliderOffset = new Vector2(1, 1);
         this._colliderSize = new Vector2(6, 6);
@@ -46,7 +53,8 @@ export class AlienBullet extends GameObject {
      */
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
-        this.position.y += this._speed * elapsedMs;
+        this.position.y += this._speed.y * elapsedMs;
+        this.position.x += this._speed.x * elapsedMs;
         this._sprite.goToFrame(this._frameIdx.value());
     }
 

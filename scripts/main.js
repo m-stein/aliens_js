@@ -24,6 +24,7 @@ import { createEnum } from './enum.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
 import { Level1 } from './level_1.js';
+import { Turret } from './turret.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -309,6 +310,11 @@ class Main extends GameObject {
             this.bigFont = new SpriteFont(fontSrc, 1, 2);
             this._enterPressAnyButton();
             this._switchToMusic(this.assets.music.battle);
+            this._turret = new Turret(
+                this.canvasRect,
+                this.assets.images.alienBullet
+            );
+            this.addChild(this._turret);
             this.gameEngine.start();
         };
     }
