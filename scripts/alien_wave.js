@@ -1,7 +1,7 @@
 import { Alien } from './alien.js';
 import { GameObject } from 'jet/game_object.js';
 import { randomInt } from 'jet/math.js';
-import { Timeout } from './timeout.js';
+import { Timeout } from 'jet/timeout.js';
 import { Vector2 } from 'jet/vector_2.js';
 
 export class AlienWave extends GameObject {

@@ -1,10 +1,10 @@
 import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
-import { Sprite } from './sprite.js';
-import { TimedValue } from './timed_value.js';
+import { Sprite } from 'jet/sprite.js';
+import { TimedValue } from 'jet/timed_value.js';
 import { Rectangle } from 'jet/rectangle.js';
 import { AlienBullet } from './alien_bullet.js';
-import { createEnum } from './enum.js';
+import { createEnum } from 'jet/enum.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 import { randomInt } from 'jet/math.js';
 

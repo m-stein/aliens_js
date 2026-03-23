@@ -1,8 +1,8 @@
 import { GameObject } from 'jet/game_object.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 import { Rectangle } from 'jet/rectangle.js';
-import { Sprite } from './sprite.js';
-import { TimedValue } from './timed_value.js';
+import { Sprite } from 'jet/sprite.js';
+import { TimedValue } from 'jet/timed_value.js';
 import { Vector2 } from 'jet/vector_2.js';
 
 export class AlienBullet extends GameObject {

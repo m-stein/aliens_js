@@ -1,5 +1,5 @@
 /* global ttac, logGameEnd, logScore, logGameStart, requestGameHighscore */
-import { createEnum } from './enum.js';
+import { createEnum } from 'jet/enum.js';
 
 export class Server {
     static Type = createEnum({

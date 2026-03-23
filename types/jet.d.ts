@@ -252,6 +252,16 @@ declare module 'jet/drawing_context.js' {
     }
     import { Vector2 } from 'jet/vector_2.js';
 }
+declare module 'jet/enum.js' {
+    /**
+     * @template {Record<string, number>} T
+     * @param {T} baseEnum
+     * @returns {{ readonly [K in keyof T]: T[K] }}
+     */
+    export function createEnum<T extends Record<string, number>>(
+        baseEnum: T
+    ): { readonly [K in keyof T]: T[K] };
+}
 declare module 'jet/game_object.js' {
     export class GameObject {
         /**
@@ -268,6 +278,12 @@ declare module 'jet/game_object.js' {
          * @param {number | null} index
          */
         addChild(child: GameObject, index?: number | null): void;
+        /**
+         * @param {((b: import('./game_object.js').GameObject) => void)} func
+         */
+        forEachChild(
+            func: (b: import('jet/game_object.js').GameObject) => void
+        ): void;
         /**
          * @param {GameObject} child
          */
@@ -295,6 +311,40 @@ declare module 'jet/game_object.js' {
             _drawingContext: import('jet/drawing_context.js').DrawingContext
         ): void;
     }
+}
+declare module 'jet/game_engine.js' {
+    export class GameEngine {
+        /**
+         * @param {import('./game_object.js').GameObject} rootGameObj
+         * @param {import('./game_object.js').GameObject} camera
+         * @param {HTMLCanvasElement} canvas
+         * @param {number} updateIntervalMs
+         */
+        constructor(
+            rootGameObj: import('jet/game_object.js').GameObject,
+            camera: import('jet/game_object.js').GameObject,
+            canvas: HTMLCanvasElement,
+            updateIntervalMs: number
+        );
+        _drawingContext: DrawingContext;
+        _lastUpdateTimeMs: number;
+        _accumulatedTimeMs: number;
+        _updateIntervalMs: number;
+        _rootGameObj: import('jet/game_object.js').GameObject;
+        _camera: import('jet/game_object.js').GameObject;
+        /** @type {null | number} */
+        _updateCallId: null | number;
+        _started: boolean;
+        /**
+         * @param {number} timeMs
+         */
+        _update: (timeMs: number) => void;
+        _scheduleUpdateCall(): void;
+        _unscheduleUpdateCall(): void;
+        start(): void;
+        stop(): void;
+    }
+    import { DrawingContext } from 'jet/drawing_context.js';
 }
 declare module 'jet/image_file.js' {
     export class ImageFile {
@@ -380,10 +430,102 @@ declare module 'jet/object_factory.js' {
     };
     export type BlueprintDict = Record<string, Blueprint>;
 }
+declare module 'jet/timeout.js' {
+    export class Timeout extends GameObject {
+        /**
+         * @param {number} ms
+         * @param {(() => void) | null} action
+         */
+        constructor(ms?: number, action?: (() => void) | null);
+        /** @type {(() => void) | null} */
+        _action: (() => void) | null;
+        /** @type {number} */
+        _ms: number;
+        /**
+         * @param {number} ms
+         * @param {(() => void) | null} action
+         */
+        set(ms: number, action?: (() => void) | null): void;
+        /**
+         * @returns {boolean}
+         */
+        running(): boolean;
+    }
+    import { GameObject } from 'jet/game_object.js';
+}
+declare module 'jet/periodic_timeout.js' {
+    export class PeriodicTimeout extends GameObject {
+        /**
+         * @param {number} ms
+         * @param {(() => void) | null} action
+         */
+        constructor(ms?: number, action?: (() => void) | null);
+        /** @type {number} */
+        _ms: number;
+        /** @type {(() => void) | null} */
+        _action: (() => void) | null;
+        /** @type {Timeout} */
+        _timeout: Timeout;
+        /**
+         * @param {number} ms
+         * @param {(() => void) | null} action
+         */
+        set(ms?: number, action?: (() => void) | null): void;
+        /**
+         * @returns {boolean}
+         */
+        running(): boolean;
+    }
+    import { GameObject } from 'jet/game_object.js';
+    import { Timeout } from 'jet/timeout.js';
+}
+declare module 'jet/sprite.js' {
+    export class Sprite extends GameObject {
+        /**
+         * @param {import('./image_file.js').ImageFile} image
+         * @param {import('./vector_2.js').Vector2=} frameSize
+         * @param {number=} numColumns
+         * @param {number=} numRows
+         * @param {number=} atFrameIdx
+         * @param {import('./vector_2.js').Vector2} framePadding
+         */
+        constructor(
+            image: import('jet/image_file.js').ImageFile,
+            frameSize?: import('jet/vector_2.js').Vector2 | undefined,
+            numColumns?: number | undefined,
+            numRows?: number | undefined,
+            atFrameIdx?: number | undefined,
+            framePadding?: import('jet/vector_2.js').Vector2
+        );
+        _image: import('jet/image_file.js').ImageFile;
+        _frameSize: Vector2;
+        _framePadding: Vector2;
+        _numColumns: number;
+        _numRows: number;
+        _atFrameIdx: number;
+        /** @type {Map<number, Vector2>} */
+        _frameMap: Map<number, Vector2>;
+        _initializeFrameMap(): void;
+        /**
+         * @returns {number}
+         */
+        frameWidth(): number;
+        /**
+         * @returns {number}
+         */
+        frameHeight(): number;
+        /**
+         * @param {number} index
+         */
+        goToFrame(index: number): number;
+    }
+    import { GameObject } from 'jet/game_object.js';
+    import { Vector2 } from 'jet/vector_2.js';
+}
 declare module 'jet/sprite_font.js' {
     export class SpriteFontSource {
         /**
-         * @param {import('jet/image_file.js').ImageFile} image
+         * @param {import('./image_file.js').ImageFile} image
          * @param {Vector2} charSize
          * @param {Map<Vector2, string[]>} chars
          */
@@ -442,4 +584,49 @@ declare module 'jet/sprite_font.js' {
     }
     import { Vector2 } from 'jet/vector_2.js';
 }
-
+declare module 'jet/timed_value.js' {
+    /**
+     * @template T
+     * @typedef {object} TimedValuePhase
+     * @property {number} ms
+     * @property {T} value
+     */
+    /**
+     * @template T
+     */
+    export class TimedValue<T> {
+        /**
+         * @param {TimedValuePhase<T>[]} phases
+         */
+        constructor(phases: TimedValuePhase<T>[]);
+        _phases: TimedValuePhase<T>[];
+        _phaseIdx: number;
+        _remainingTimeMs: number;
+        /**
+         * @param {number} phaseIdx
+         */
+        startPhase(phaseIdx: number): void;
+        /**
+         * @param {number} phaseIdx
+         */
+        startPhaseWithRandomTimeOffset(phaseIdx: number): void;
+        /**
+         * @param {number} elapsedMs
+         */
+        update(elapsedMs: number): void;
+        /**
+         * @returns {T}
+         */
+        value(): T;
+        /**
+         * @param {import('./drawing_context.js').DrawingContext} _drawingContext
+         */
+        draw(
+            _drawingContext: import('jet/drawing_context.js').DrawingContext
+        ): void;
+    }
+    export type TimedValuePhase<T> = {
+        ms: number;
+        value: T;
+    };
+}

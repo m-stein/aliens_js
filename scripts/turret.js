@@ -2,7 +2,7 @@ import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
 import { Rectangle } from 'jet/rectangle.js';
 import { AlienBullet } from './alien_bullet.js';
-import { Timeout } from './timeout.js';
+import { Timeout } from 'jet/timeout.js';
 import { Sprite } from 'jet/sprite.js';
 import { ContainerObject } from './container_object.js';
 import { TimedValue } from 'jet/timed_value.js';

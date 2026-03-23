@@ -1,4 +1,4 @@
-import { GameEngine } from './game_engine.js';
+import { GameEngine } from 'jet/game_engine.js';
 import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
 import { Camera } from './camera.js';
@@ -20,7 +20,7 @@ import {
     SCORE_PER_HIT,
 } from './parameters.js';
 import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
-import { createEnum } from './enum.js';
+import { createEnum } from 'jet/enum.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
 import { Level1 } from './level_1.js';
@@ -276,12 +276,12 @@ class Main extends GameObject {
             });
         });
         this.camera = new Camera(null, this.canvas.width, this.canvas.height);
-        this.gameEngine = new GameEngine({
-            rootGameObj: this,
-            camera: this.camera,
-            canvas: this.canvas,
-            updatePeriodMs: 1000 / 60,
-        });
+        this.gameEngine = new GameEngine(
+            this,
+            this.camera,
+            this.canvas,
+            1000 / 60
+        );
         this.onAllAssetsLoaded = () => {
             this.addChild(this.camera);
             this.starsLayers = [
