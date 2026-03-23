@@ -169,6 +169,11 @@ class Main extends GameObject {
                     this.rootPath + '/images/player.png',
                     this._onAssetLoaded
                 ),
+                turret: new ImageFile(
+                    this.window.document,
+                    this.rootPath + '/images/turret.png',
+                    this._onAssetLoaded
+                ),
                 bullet: new ImageFile(
                     this.window.document,
                     this.rootPath + '/images/bullet.png',
@@ -312,7 +317,8 @@ class Main extends GameObject {
             this._switchToMusic(this.assets.music.battle);
             this._turret = new Turret(
                 this.canvasRect,
-                this.assets.images.alienBullet
+                this.assets.images.alienBullet,
+                this.assets.images.turret
             );
             this.addChild(this._turret);
             this.gameEngine.start();
