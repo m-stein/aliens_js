@@ -15,22 +15,27 @@ export class Player extends GameObject {
 
     static RESPAWN_TIMEOUT_MS = 2000;
 
+    /**
+     * @param {Rectangle} fbRect
+     * @param {import('jet/image_file.js').ImageFile} image
+     * @param {Set<string>} pressedKeys
+     */
     constructor(fbRect, image, pressedKeys) {
         super(new Vector2(fbRect.width / 2 - 16, fbRect.height - 32), 'Player');
-        this.state = Player.State.Alive;
-        this.sprite = new Sprite(image, new Vector2(32, 32), 2, 1);
-        this.rifleTipOffset = new Vector2(15.5, 4);
-        this.fbRect = fbRect;
+        this._state = Player.State.Alive;
+        this._sprite = new Sprite(image, new Vector2(32, 32), 2, 1);
+        this._rifleTipOffset = new Vector2(15.5, 4);
+        this._fbRect = fbRect;
         this.pressedKeys = pressedKeys;
         this.speed = 300 / 1000;
         this.colliderOffset = new Vector2(10, 7);
         this.colliderSize = new Vector2(11, 17);
-        this.minY = this.fbRect.top;
+        this.minY = this._fbRect.top;
         this.maxY =
-            this.fbRect.height - this.colliderOffset.y - this.colliderSize.y;
+            this._fbRect.height - this.colliderOffset.y - this.colliderSize.y;
         this.minX = -this.colliderOffset.x;
         this.maxX =
-            this.fbRect.width - this.colliderOffset.x - this.colliderSize.x;
+            this._fbRect.width - this.colliderOffset.x - this.colliderSize.x;
         this.frameIdx = new TimedValue([
             { ms: 100, value: 0 },
             { ms: 100, value: 1 },
@@ -41,36 +46,42 @@ export class Player extends GameObject {
         ]);
         this.respawnTimeout = new Timeout(
             Player.RESPAWN_TIMEOUT_MS,
-            this.finishRespawning
+            this._finishRespawning
         );
         this.respawnAt = this.position.copy();
         this.addChild(this.frameIdx);
-        this.addChild(this.sprite);
+        this.addChild(this._sprite);
     }
 
-    finishRespawning = () => {
-        this.state = Player.State.Alive;
+    _finishRespawning = () => {
+        this._state = Player.State.Alive;
         this.removeChild(this.respawnTimeout);
         this.removeChild(this.respawnVisibility);
     };
 
+    /**
+     * @returns {Vector2}
+     */
     rifleTip() {
         return new Vector2(
-            this.position.x + this.rifleTipOffset.x,
-            this.position.y + this.rifleTipOffset.y
+            this.position.x + this._rifleTipOffset.x,
+            this.position.y + this._rifleTipOffset.y
         );
     }
 
+    /**
+     * @returns {boolean}
+     */
     readyToShoot() {
-        return this.state == Player.State.Alive;
+        return this._state == Player.State.Alive;
     }
 
     /**
-     * @param {DrawingContext} drawingContext
+     * @param {import('jet/drawing_context.js').DrawingContext} drawingContext
      */
     draw(drawingContext) {
         if (
-            this.state == Player.State.Respawning &&
+            this._state == Player.State.Respawning &&
             !this.respawnVisibility.value()
         ) {
             return;
@@ -81,21 +92,24 @@ export class Player extends GameObject {
         }
     }
 
+    /**
+     * @param {number} elapsedMs
+     */
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
         this._updatePosition(elapsedMs);
-        this.sprite.goToFrame(this.frameIdx.value());
+        this._sprite.goToFrame(this.frameIdx.value());
     }
 
     /**
      * @returns {boolean}
      */
     vulnerable() {
-        return this.state == Player.State.Alive;
+        return this._state == Player.State.Alive;
     }
 
     respawn() {
-        this.state = Player.State.Respawning;
+        this._state = Player.State.Respawning;
         this.respawnVisibility.startPhase(0);
         this.respawnTimeout.set(Player.RESPAWN_TIMEOUT_MS);
         this.position = this.respawnAt.copy();
@@ -103,6 +117,9 @@ export class Player extends GameObject {
         this.addChild(this.respawnVisibility);
     }
 
+    /**
+     * @param {number} elapsedMs
+     */
     _updatePosition(elapsedMs) {
         let direction = new Vector2(0, 0);
         if (this.pressedKeys.has('KeyA')) {
@@ -140,6 +157,9 @@ export class Player extends GameObject {
         }
     }
 
+    /**
+     * @returns {Rectangle}
+     */
     collider() {
         return new Rectangle(
             new Vector2(

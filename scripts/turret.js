@@ -6,18 +6,7 @@ import { Timeout } from 'jet/timeout.js';
 import { Sprite } from 'jet/sprite.js';
 import { TimedValue } from 'jet/timed_value.js';
 import { Container } from 'jet/container.js';
-
-/**
- * Returns a normalized 2D vector (length = 1) for a given angle in degrees.
- * @param {number} degrees
- * @returns {Vector2}
- */
-export function angleToUnitVector(degrees) {
-    const radians = degrees * (Math.PI / 180);
-    const x = Math.cos(radians);
-    const y = Math.sin(radians);
-    return new Vector2(x, y);
-}
+import { angleToUnitVector } from 'jet/math.js';
 
 export class Turret extends GameObject {
     /**

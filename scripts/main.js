@@ -47,11 +47,11 @@ class Main extends GameObject {
         switch (event.code) {
             case this.settings.fireKey():
                 if (
-                    this.player.readyToShoot() &&
+                    this._player.readyToShoot() &&
                     this.playerBullets.length < MAX_NUM_PLAYER_BULLETS
                 ) {
                     let bullet = new Bullet(
-                        this.player.rifleTip(),
+                        this._player.rifleTip(),
                         this.assets.images.bullet
                     );
                     this.playerBullets.push(bullet);
@@ -384,12 +384,12 @@ class Main extends GameObject {
     _enterLevel() {
         /** @type {Bullet[]} */
         this.playerBullets = [];
-        this.player = new Player(
+        this._player = new Player(
             this.canvasRect,
             this.assets.images.player,
             this.pressedKeys
         );
-        this.addChild(this.player);
+        this.addChild(this._player);
         const asteroidParams = [
             {
                 image: this.assets.images.asteroid0,
@@ -424,6 +424,7 @@ class Main extends GameObject {
             explosionImg: this.assets.images.explosion,
             alienBulletImg: this.assets.images.alienBullet,
             asteroidParams: asteroidParams,
+            playerImg: this.assets.images.player,
         });
         this.addChild(this.level);
         this.score = 0;
@@ -464,16 +465,16 @@ class Main extends GameObject {
     }
 
     _goFromLevelToGameOver() {
-        this.removeChild(this.player);
-        this.player = null;
+        this.removeChild(this._player);
+        this._player = null;
         this._enterGameOver();
         this._switchToMusic(this.assets.music.gameOver);
     }
 
     _goFromLevelToMainMenu() {
         this._removeCommonLevelObjects();
-        this.removeChild(this.player);
-        this.player = null;
+        this.removeChild(this._player);
+        this._player = null;
         this._enterMainMenu();
     }
 
@@ -523,7 +524,7 @@ class Main extends GameObject {
         this.bonus = Math.floor(this.bonus / SCORE_BONUS_DIV_PER_DEATH);
         this.statusBar.updateScoreBonusStr(this.score, this.bonus);
         this.statusBar.decrNumLives();
-        this.player.respawn();
+        this._player.respawn();
     };
 
     update(elapsedMs) {
@@ -541,15 +542,15 @@ class Main extends GameObject {
             case Main.State.Level:
                 this._handleInteractionsOfPlayerBullets();
                 this.level.handleAsteroidInteractions(
-                    this.player,
+                    this._player,
                     this._killPlayer
                 );
                 this.level.handleAlienBulletInteractions(
-                    this.player,
+                    this._player,
                     this._killPlayer
                 );
                 this.level.handleAlienShipInteractions(
-                    this.player,
+                    this._player,
                     this._killPlayer
                 );
                 if (this.statusBar.numLives() == 0) {

@@ -12,6 +12,8 @@ export class Level1 extends GameObject {
      *   alienImg: import('jet/image_file.js').ImageFile,
      *   explosionImg: import('jet/image_file.js').ImageFile,
      *   alienBulletImg: import('jet/image_file.js').ImageFile
+     *   playerImg: import('jet/image_file.js').ImageFile
+     *   pressedKeys: Set<string>
      *   asteroidParams: {
      *      image: import('jet/image_file.js').ImageFile,
      *      collider: import('jet/rectangle.js').Rectangle,
@@ -28,7 +30,12 @@ export class Level1 extends GameObject {
         });
         this.addChild(this._asteroidWave);
         this._alienWave = new AlienWave({
-            ...args,
+            dstRect: args.dstRect,
+            alienExplosionSfx: args.alienExplosionSfx,
+            alienLaserSfx: args.alienLaserSfx,
+            alienBulletImg: args.alienBulletImg,
+            alienImg: args.alienImg,
+            explosionImg: args.explosionImg,
             minSpawnTimeoutMs: 4000,
             maxSpawnTimeoutMs: 6000,
             onAlienSpawned: this._onAlienSpawned,
@@ -70,7 +77,7 @@ export class Level1 extends GameObject {
                 this._alienWave.changeConfig(200, 1200);
                 break;
         }
-                */
+        */
     };
 
     /**
@@ -177,7 +184,7 @@ export class Level1 extends GameObject {
     }
 
     /**
-     * @param {import('drawing_context.js').DrawingContext} drawingContext
+     * @param {import('jet/drawing_context.js').DrawingContext} drawingContext
      */
     draw(drawingContext) {
         this.drawChildren(drawingContext);

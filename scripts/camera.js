@@ -27,7 +27,7 @@ export class Camera extends GameObject {
     }
 
     /**
-     * @param {import('drawing_context.js').DrawingContext} drawingContext
+     * @param {import('jet/drawing_context.js').DrawingContext} drawingContext
      */
     draw(drawingContext) {
         this.drawChildren(drawingContext);

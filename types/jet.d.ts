@@ -101,6 +101,11 @@ declare module 'jet/math.js' {
         matrixSize: number,
         numRotations: number
     ): Vector2;
+    /**
+     * @param {number} degrees
+     * @returns {Vector2}
+     */
+    export function angleToUnitVector(degrees: number): Vector2;
     import { Vector2 } from 'jet/vector_2.js';
 }
 declare module 'jet/array.js' {
@@ -600,7 +605,7 @@ declare module 'jet/timed_value.js' {
     /**
      * @template T
      */
-    export class TimedValue<T> {
+    export class TimedValue<T> extends GameObject {
         /**
          * @param {TimedValuePhase<T>[]} phases
          */
@@ -617,22 +622,14 @@ declare module 'jet/timed_value.js' {
          */
         startPhaseWithRandomTimeOffset(phaseIdx: number): void;
         /**
-         * @param {number} elapsedMs
-         */
-        update(elapsedMs: number): void;
-        /**
          * @returns {T}
          */
         value(): T;
-        /**
-         * @param {import('./drawing_context.js').DrawingContext} _drawingContext
-         */
-        draw(
-            _drawingContext: import('jet/drawing_context.js').DrawingContext
-        ): void;
     }
     export type TimedValuePhase<T> = {
         ms: number;
         value: T;
     };
+    import { GameObject } from 'jet/game_object.js';
 }
+
