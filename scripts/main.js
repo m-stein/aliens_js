@@ -3,14 +3,11 @@ import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
 import { Camera } from './camera.js';
 import { Rectangle } from 'jet/rectangle.js';
-import { ImageFile } from 'jet/image_file.js';
-import { removeItem } from 'jet/array.js';
 import { Server } from './server.js';
 import { Player } from './player.js';
 import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
-import { AudioFile } from 'jet/audio_file.js';
 import { SpriteFont, SpriteFontSource } from 'jet/sprite_font.js';
 import { charRange } from 'jet/char.js';
 import {
@@ -25,6 +22,7 @@ import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
 import { Level1 } from './level_1.js';
 import { Turret } from './turret.js';
+import { AssetManager } from 'jet/asset_manager.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -36,13 +34,6 @@ class Main extends GameObject {
         GameOver: 3,
     });
 
-    _onAssetLoaded = (asset) => {
-        removeItem(this.loadingAssets, asset);
-        if (this.loadingAssets.length == 0) {
-            this.onAllAssetsLoaded();
-        }
-    };
-
     _handleLevelKeyDown(event) {
         switch (event.code) {
             case this.settings.fireKey():
@@ -52,11 +43,12 @@ class Main extends GameObject {
                 ) {
                     let bullet = new Bullet(
                         this._player.rifleTip(),
-                        this.assets.images.bullet
+                        this._assetMgr.imageAsset('bullet')
                     );
                     this.playerBullets.push(bullet);
                     this.addChild(bullet);
-                    const sound = this.assets.sounds.playerLaser.htmlElement;
+                    const sound =
+                        this._assetMgr.audioAsset('player_laser').htmlElement;
                     sound.pause();
                     sound.currentTime = 0;
                     sound.play();
@@ -161,120 +153,6 @@ class Main extends GameObject {
         this.window.addEventListener('keydown', this._onKeyDown);
         this.window.addEventListener('keyup', this._onKeyUp);
 
-        this.loadingAssets = [];
-        this.assets = {
-            images: {
-                player: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/player.png',
-                    this._onAssetLoaded
-                ),
-                turret: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/turret.png',
-                    this._onAssetLoaded
-                ),
-                bullet: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/bullet.png',
-                    this._onAssetLoaded
-                ),
-                alien: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/alien.png',
-                    this._onAssetLoaded
-                ),
-                alienBullet: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/alien_bullet.png',
-                    this._onAssetLoaded
-                ),
-                explosion: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/explosion.png',
-                    this._onAssetLoaded
-                ),
-                asteroid0: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/asteroid_0.png',
-                    this._onAssetLoaded
-                ),
-                asteroid1: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/asteroid_1.png',
-                    this._onAssetLoaded
-                ),
-                asteroid2: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/asteroid_2.png',
-                    this._onAssetLoaded
-                ),
-                asteroid3: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/asteroid_3.png',
-                    this._onAssetLoaded
-                ),
-                asteroid4: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/asteroid_4.png',
-                    this._onAssetLoaded
-                ),
-                asteroid5: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/asteroid_5.png',
-                    this._onAssetLoaded
-                ),
-                live: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/live.png',
-                    this._onAssetLoaded
-                ),
-                font: new ImageFile(
-                    this.window.document,
-                    this.rootPath + '/images/font.png',
-                    this._onAssetLoaded
-                ),
-            },
-            music: {
-                battle: new AudioFile(
-                    this.window.document,
-                    this.rootPath + '/music/battle.ogg',
-                    this._onAssetLoaded
-                ),
-                gameOver: new AudioFile(
-                    this.window.document,
-                    this.rootPath + '/music/game_over.ogg',
-                    this._onAssetLoaded
-                ),
-            },
-            sounds: {
-                playerLaser: new AudioFile(
-                    this.window.document,
-                    this.rootPath + '/sounds/player_laser.wav',
-                    this._onAssetLoaded
-                ),
-                playerExplosion: new AudioFile(
-                    this.window.document,
-                    this.rootPath + '/sounds/player_explosion.wav',
-                    this._onAssetLoaded
-                ),
-                alienLaser: new AudioFile(
-                    this.window.document,
-                    this.rootPath + '/sounds/alien_laser.wav',
-                    this._onAssetLoaded
-                ),
-                alienExplosion: new AudioFile(
-                    this.window.document,
-                    this.rootPath + '/sounds/alien_explosion.wav',
-                    this._onAssetLoaded
-                ),
-            },
-        };
-        Object.values(this.assets).forEach((category) => {
-            Object.values(category).forEach((asset) => {
-                this.loadingAssets.push(asset);
-            });
-        });
         this.camera = new Camera(null, this.canvas.width, this.canvas.height);
         this.gameEngine = new GameEngine(
             this,
@@ -282,7 +160,7 @@ class Main extends GameObject {
             this.canvas,
             1000 / 60
         );
-        this.onAllAssetsLoaded = () => {
+        this._onAssetsLoaded = () => {
             this.addChild(this.camera);
             this.starsLayers = [
                 new Stars(
@@ -314,15 +192,41 @@ class Main extends GameObject {
             this.smallFont = new SpriteFont(fontSrc, 1);
             this.bigFont = new SpriteFont(fontSrc, 1, 2);
             this._enterPressAnyButton();
-            this._switchToMusic(this.assets.music.battle);
+            this._switchToMusic(this._assetMgr.audioAsset('battle'));
             this._turret = new Turret(
                 this.canvasRect,
-                this.assets.images.alienBullet,
-                this.assets.images.turret
+                this._assetMgr.imageAsset('alien_bullet'),
+                this._assetMgr.imageAsset('turret')
             );
             this.addChild(this._turret);
             this.gameEngine.start();
         };
+        this._assetMgr = new AssetManager(this.window.document, this.rootPath);
+        this._assetMgr.addImageAssets([
+            { id: 'player', path: '/images/player.png' },
+            { id: 'turret', path: '/images/turret.png' },
+            { id: 'bullet', path: '/images/bullet.png' },
+            { id: 'alien', path: '/images/alien.png' },
+            { id: 'alien_bullet', path: '/images/alien_bullet.png' },
+            { id: 'explosion', path: '/images/explosion.png' },
+            { id: 'asteroid_0', path: '/images/asteroid_0.png' },
+            { id: 'asteroid_1', path: '/images/asteroid_1.png' },
+            { id: 'asteroid_2', path: '/images/asteroid_2.png' },
+            { id: 'asteroid_3', path: '/images/asteroid_3.png' },
+            { id: 'asteroid_4', path: '/images/asteroid_4.png' },
+            { id: 'asteroid_5', path: '/images/asteroid_5.png' },
+            { id: 'live', path: '/images/live.png' },
+            { id: 'font', path: '/images/font.png' },
+        ]);
+        this._assetMgr.addAudioAssets([
+            { id: 'battle', path: '/music/battle.ogg' },
+            { id: 'game_over', path: '/music/game_over.ogg' },
+            { id: 'player_laser', path: '/sounds/player_laser.wav' },
+            { id: 'player_explosion', path: '/sounds/player_explosion.wav' },
+            { id: 'alien_laser', path: '/sounds/alien_laser.wav' },
+            { id: 'alien_explosion', path: '/sounds/alien_explosion.wav' },
+        ]);
+        this._assetMgr.loadAssets(this._onAssetsLoaded);
     }
 
     /**
@@ -330,7 +234,7 @@ class Main extends GameObject {
      */
     _createFontSource() {
         return new SpriteFontSource(
-            this.assets.images.font,
+            this._assetMgr.imageAsset('font'),
             new Vector2(9, 9),
             new Map([
                 [new Vector2(32, 0), charRange('A', 'Z')],
@@ -386,45 +290,46 @@ class Main extends GameObject {
         this.playerBullets = [];
         this._player = new Player(
             this.canvasRect,
-            this.assets.images.player,
+            this._assetMgr.imageAsset('player'),
             this.pressedKeys
         );
         this.addChild(this._player);
         const asteroidParams = [
             {
-                image: this.assets.images.asteroid0,
+                image: this._assetMgr.imageAsset('asteroid_0'),
                 collider: new Rectangle(new Vector2(58, 60), 90, 72),
             },
             {
-                image: this.assets.images.asteroid1,
+                image: this._assetMgr.imageAsset('asteroid_1'),
                 collider: new Rectangle(new Vector2(52, 66), 96, 70),
             },
             {
-                image: this.assets.images.asteroid2,
+                image: this._assetMgr.imageAsset('asteroid_2'),
                 collider: new Rectangle(new Vector2(60, 82), 134, 88),
             },
             {
-                image: this.assets.images.asteroid3,
+                image: this._assetMgr.imageAsset('asteroid_3'),
                 collider: new Rectangle(new Vector2(72, 80), 106, 112),
             },
             {
-                image: this.assets.images.asteroid4,
+                image: this._assetMgr.imageAsset('asteroid_4'),
                 collider: new Rectangle(new Vector2(41, 62), 144, 100),
             },
             {
-                image: this.assets.images.asteroid5,
+                image: this._assetMgr.imageAsset('asteroid_5'),
                 collider: new Rectangle(new Vector2(42, 66), 142, 85),
             },
         ];
         this.level = new Level1({
             dstRect: this.canvasRect,
-            alienLaserSfx: this.assets.sounds.alienLaser,
-            alienExplosionSfx: this.assets.sounds.alienExplosion,
-            alienImg: this.assets.images.alien,
-            explosionImg: this.assets.images.explosion,
-            alienBulletImg: this.assets.images.alienBullet,
+            alienLaserSfx: this._assetMgr.audioAsset('alien_laser'),
+            alienExplosionSfx: this._assetMgr.audioAsset('alien_explosion'),
+            alienImg: this._assetMgr.imageAsset('alien'),
+            explosionImg: this._assetMgr.imageAsset('explosion'),
+            alienBulletImg: this._assetMgr.imageAsset('alien_bullet'),
             asteroidParams: asteroidParams,
-            playerImg: this.assets.images.player,
+            playerImg: this._assetMgr.imageAsset('player'),
+            pressedKeys: this.pressedKeys,
         });
         this.addChild(this.level);
         this.score = 0;
@@ -435,7 +340,7 @@ class Main extends GameObject {
             this.smallFont,
             this.score,
             this.bonus,
-            this.assets.images.live
+            this._assetMgr.imageAsset('live')
         );
         this.addChild(this.statusBar);
         this.state = Main.State.Level;
@@ -468,7 +373,7 @@ class Main extends GameObject {
         this.removeChild(this._player);
         this._player = null;
         this._enterGameOver();
-        this._switchToMusic(this.assets.music.gameOver);
+        this._switchToMusic(this._assetMgr.audioAsset('game_over'));
     }
 
     _goFromLevelToMainMenu() {
@@ -483,7 +388,7 @@ class Main extends GameObject {
         this.removeChild(this.gameOver);
         this.gameOver = null;
         this._enterMainMenu();
-        this._switchToMusic(this.assets.music.battle);
+        this._switchToMusic(this._assetMgr.audioAsset('battle'));
     }
 
     _handleInteractionsOfPlayerBullets() {
@@ -517,7 +422,7 @@ class Main extends GameObject {
     }
 
     _killPlayer = () => {
-        const sound = this.assets.sounds.playerExplosion.htmlElement;
+        const sound = this._assetMgr.audioAsset('player_explosion').htmlElement;
         sound.pause();
         sound.currentTime = 0;
         sound.play();

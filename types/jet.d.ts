@@ -162,6 +162,124 @@ declare module 'jet/audio_file.js' {
         onCanPlayThrough: () => void;
     }
 }
+declare module 'jet/image_file.js' {
+    export class ImageFile {
+        /**
+         * @param {Document} htmlDocument
+         * @param {string} relPath
+         * @param {(a: ImageFile) => void} onLoaded
+         */
+        constructor(
+            htmlDocument: Document,
+            relPath: string,
+            onLoaded: (a: ImageFile) => void
+        );
+        relPath: string;
+        onLoaded: (a: ImageFile) => void;
+        htmlElement: HTMLImageElement;
+    }
+}
+declare module 'jet/asset_manager.js' {
+    export class AssetManager {
+        /**
+         * @param {HTMLDocument} document
+         * @param {string} rootPath
+         */
+        constructor(document: HTMLDocument, rootPath: string);
+        _rootPath: string;
+        _document: HTMLDocument;
+        /** @type {{path: string, id: string, obj: AudioFile | null}[]} */
+        _pendingAudioAssets: {
+            path: string;
+            id: string;
+            obj: AudioFile | null;
+        }[];
+        /** @type {{path: string, id: string, obj: ImageFile | null}[]} */
+        _pendingImgAssets: {
+            path: string;
+            id: string;
+            obj: ImageFile | null;
+        }[];
+        /** @type {Object<string, AudioFile>} */
+        _audioAssets: {
+            [x: string]: AudioFile;
+        };
+        /** @type {Object<string, ImageFile>} */
+        _imgAssets: {
+            [x: string]: ImageFile;
+        };
+        /**
+         * @param {(() => void)} finishedFn
+         */
+        loadAssets(finishedFn: () => void): void;
+        _loadingFinishedFn: (() => void) | undefined;
+        /**
+         * @param {{path: string, id: string, obj: AudioFile | ImageFile | null}[]} pendingAssets
+         * @param {{path: string, id: string}[]} assets
+         */
+        _addAssets(
+            pendingAssets: {
+                path: string;
+                id: string;
+                obj: AudioFile | ImageFile | null;
+            }[],
+            assets: {
+                path: string;
+                id: string;
+            }[]
+        ): void;
+        /**
+         * @param {{path: string, id: string}[]} assets
+         */
+        addAudioAssets(
+            assets: {
+                path: string;
+                id: string;
+            }[]
+        ): void;
+        /**
+         * @param {{path: string, id: string}[]} assets
+         */
+        addImageAssets(
+            assets: {
+                path: string;
+                id: string;
+            }[]
+        ): void;
+        /**
+         * @param {ImageFile | AudioFile} assetObj
+         * @param {{path: string, id: string, obj: AudioFile | ImageFile | null}[]} pendingAssets
+         * @param {Object<string, AudioFile | ImageFile>} loadedAssets
+         */
+        _markAssetLoaded(
+            assetObj: ImageFile | AudioFile,
+            pendingAssets: {
+                path: string;
+                id: string;
+                obj: AudioFile | ImageFile | null;
+            }[],
+            loadedAssets: {
+                [x: string]: AudioFile | ImageFile;
+            }
+        ): void;
+        /**
+         * @param {ImageFile | AudioFile} assetObj
+         */
+        _onAssetLoaded: (assetObj: ImageFile | AudioFile) => void;
+        /**
+         * @param {string} path
+         * @returns {AudioFile}
+         */
+        audioAsset(path: string): AudioFile;
+        /**
+         * @param {string} path
+         * @returns {ImageFile}
+         */
+        imageAsset(path: string): ImageFile;
+    }
+    import { AudioFile } from 'jet/audio_file.js';
+    import { ImageFile } from 'jet/image_file.js';
+}
 declare module 'jet/char.js' {
     /**
      * @param {string} start
@@ -356,23 +474,6 @@ declare module 'jet/game_engine.js' {
         stop(): void;
     }
     import { DrawingContext } from 'jet/drawing_context.js';
-}
-declare module 'jet/image_file.js' {
-    export class ImageFile {
-        /**
-         * @param {Document} htmlDocument
-         * @param {string} relPath
-         * @param {(a: ImageFile) => void} onLoaded
-         */
-        constructor(
-            htmlDocument: Document,
-            relPath: string,
-            onLoaded: (a: ImageFile) => void
-        );
-        relPath: string;
-        onLoaded: (a: ImageFile) => void;
-        htmlElement: HTMLImageElement;
-    }
 }
 declare module 'jet/json_file.js' {
     export class JsonFile {
@@ -632,4 +733,3 @@ declare module 'jet/timed_value.js' {
     };
     import { GameObject } from 'jet/game_object.js';
 }
-
