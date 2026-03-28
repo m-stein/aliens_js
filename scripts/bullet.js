@@ -15,18 +15,18 @@ export class Bullet extends GameObject {
             new Vector2(rifleTip.x - size.x / 2, rifleTip.y - size.y),
             'Bullet'
         );
-        this.sprite = new Sprite(image);
-        this.size = size;
-        this.speed = 600.0 / 1000;
-        this.colliderOffset = this.sprite.position.copy();
-        this.addChild(this.sprite);
+        this._sprite = new Sprite(image);
+        this._size = size;
+        this._speed = 600.0 / 1000;
+        this._colliderOffset = this._sprite.position.copy();
+        this.addChild(this._sprite);
     }
 
     /**
      * @param {number} elapsedMs
      */
     update(elapsedMs) {
-        this.position.y -= this.speed * elapsedMs;
+        this.position.y -= this._speed * elapsedMs;
         this.updateChildren(elapsedMs);
     }
 
@@ -44,13 +44,13 @@ export class Bullet extends GameObject {
      * @returns {boolean}
      */
     outOfSight() {
-        return this.position.y < -this.size.y;
+        return this.position.y < -this._size.y;
     }
 
     /**
      * @returns {Rectangle}
      */
     collider() {
-        return new Rectangle(this.position.copy(), this.size.x, this.size.y);
+        return new Rectangle(this.position.copy(), this._size.x, this._size.y);
     }
 }
