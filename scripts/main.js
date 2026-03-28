@@ -1,15 +1,20 @@
 import { GameEngine } from 'jet/game_engine.js';
 import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
-import { Camera } from './camera.js';
 import { Rectangle } from 'jet/rectangle.js';
+import { SpriteFont, SpriteFontSource } from 'jet/sprite_font.js';
+import { charRange } from 'jet/char.js';
+import { createEnum } from 'jet/enum.js';
+import { AssetManager } from 'jet/asset_manager.js';
+import { getHtmlAttr, getHtmlElem } from 'jet/html.js';
+import { assertNotNull } from 'jet/assertions.js';
+import { Camera } from 'jet/camera.js';
+
 import { Server } from './server.js';
 import { Player } from './player.js';
 import { Stars } from './stars.js';
 import { Settings } from './settings.js';
 import { Bullet } from './bullet.js';
-import { SpriteFont, SpriteFontSource } from 'jet/sprite_font.js';
-import { charRange } from 'jet/char.js';
 import {
     SCORE_BONUS_DECR_PER_MISS,
     SCORE_BONUS_DIV_PER_DEATH,
@@ -17,12 +22,10 @@ import {
     SCORE_PER_HIT,
 } from './parameters.js';
 import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
-import { createEnum } from 'jet/enum.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
 import { Level1 } from './level_1.js';
 import { Turret } from './turret.js';
-import { AssetManager } from 'jet/asset_manager.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -34,18 +37,21 @@ class Main extends GameObject {
         GameOver: 3,
     });
 
+    /**
+     * @param {KeyboardEvent} event
+     */
     _handleLevelKeyDown(event) {
         switch (event.code) {
-            case this.settings.fireKey():
+            case this._settings.fireKey():
                 if (
-                    this._player.readyToShoot() &&
-                    this.playerBullets.length < MAX_NUM_PLAYER_BULLETS
+                    this._player?.readyToShoot() &&
+                    this._playerBullets.length < MAX_NUM_PLAYER_BULLETS
                 ) {
                     let bullet = new Bullet(
                         this._player.rifleTip(),
                         this._assetMgr.imageAsset('bullet')
                     );
-                    this.playerBullets.push(bullet);
+                    this._playerBullets.push(bullet);
                     this.addChild(bullet);
                     const sound =
                         this._assetMgr.audioAsset('player_laser').htmlElement;
@@ -54,35 +60,44 @@ class Main extends GameObject {
                     sound.play();
                 }
                 break;
-            case this.settings.exitKey():
+            case this._settings.exitKey():
                 this._goFromLevelToMainMenu();
                 break;
         }
     }
 
+    /**
+     * @param {KeyboardEvent} event
+     */
     _handlePressAnyButtonKeyDown(event) {
         switch (event.code) {
-            case this.settings.fireKey():
+            case this._settings.fireKey():
                 this._goFromPressAnyButtonToMainMenu();
                 break;
         }
     }
 
+    /**
+     * @param {KeyboardEvent} event
+     */
     _handleMainMenuKeyDown(event) {
-        if (this.mainMenu.acceptsInput()) {
+        if (this._mainMenu?.acceptsInput()) {
             switch (event.code) {
-                case this.settings.fireKey():
+                case this._settings.fireKey():
                     this._goFromMainMenuToLevel();
                     break;
             }
         }
     }
 
+    /**
+     * @param {KeyboardEvent} event
+     */
     _handleGameOverKeyDown(event) {
-        if (this.gameOver.acceptsInput()) {
+        if (this._gameOver?.acceptsInput()) {
             switch (event.code) {
-                case this.settings.fireKey():
-                case this.settings.exitKey():
+                case this._settings.fireKey():
+                case this._settings.exitKey():
                     this._goFromGameOverToMainMenu();
                     break;
             }
@@ -90,23 +105,26 @@ class Main extends GameObject {
     }
 
     _tryStartMusic() {
-        if (this.music) {
-            if (this.music.paused) {
-                this.music.play();
+        if (this._music) {
+            if (this._music.paused) {
+                this._music.play();
             }
         }
     }
 
     _tryStopMusic() {
-        if (this.music) {
-            this.music.pause();
-            this.music.currentTime = 0;
+        if (this._music) {
+            this._music.pause();
+            this._music.currentTime = 0;
         }
     }
 
+    /**
+     * @param {KeyboardEvent} event
+     */
     _onKeyDown = (event) => {
-        if (!this.pressedKeys.has(event.code)) {
-            switch (this.state) {
+        if (!this._pressedKeys.has(event.code)) {
+            switch (this._state) {
                 case Main.State.PressAnyButton:
                     this._handlePressAnyButtonKeyDown(event);
                     break;
@@ -121,87 +139,107 @@ class Main extends GameObject {
                     break;
             }
         }
-        this.pressedKeys.add(event.code);
+        this._pressedKeys.add(event.code);
         this._tryStartMusic();
     };
 
+    /**
+     * @param {KeyboardEvent} event
+     */
     _onKeyUp = (event) => {
-        this.pressedKeys.delete(event.code);
+        this._pressedKeys.delete(event.code);
     };
 
-    constructor(mainWindow, jsonParser, scriptElemId) {
+    /**
+     *
+     * @param {Window} window
+     * @param {JSON} jsonParser
+     * @param {string} scriptElemId
+     */
+    constructor(window, jsonParser, scriptElemId) {
         super(new Vector2(0, 0), 'Main');
-        const scriptElem = mainWindow.document.getElementById(scriptElemId);
-        this.pressedKeys = new Set();
-        this.window = mainWindow;
-        this.music = null;
-        this.server = new Server(
-            Server.Type[scriptElem.getAttribute('serverType')]
+        this._window = window;
+        const scriptElem = getHtmlElem(
+            window.document,
+            scriptElemId,
+            HTMLScriptElement
         );
-        this.rootPath = scriptElem.getAttribute('rootPath');
-        this.jsonParser = jsonParser;
-        this.canvas = this.window.document.getElementById(
-            scriptElem.getAttribute('canvasId')
+        this._pressedKeys = new Set();
+        /** @type {Bullet[]} */
+        this._playerBullets = [];
+        this._music = null;
+        this._server = new Server(
+            Server.Type.fromString(getHtmlAttr(scriptElem, 'serverType'))
         );
-        this.canvasRect = new Rectangle(
+        this._rootPath = getHtmlAttr(scriptElem, 'rootPath');
+        this._jsonParser = jsonParser;
+        this._canvas = getHtmlElem(
+            this._window.document,
+            getHtmlAttr(scriptElem, 'canvasId'),
+            HTMLCanvasElement
+        );
+        this._canvasRect = new Rectangle(
             new Vector2(0, 0),
-            this.canvas.width,
-            this.canvas.height - STATUS_BAR_HEIGHT
+            this._canvas.width,
+            this._canvas.height - STATUS_BAR_HEIGHT
         );
-        this.settings = new Settings();
+        this._settings = new Settings();
 
-        this.window.addEventListener('keydown', this._onKeyDown);
-        this.window.addEventListener('keyup', this._onKeyUp);
+        this._window.addEventListener('keydown', this._onKeyDown);
+        this._window.addEventListener('keyup', this._onKeyUp);
 
-        this.camera = new Camera(null, this.canvas.width, this.canvas.height);
-        this.gameEngine = new GameEngine(
+        this._cam = new Camera(null, this._canvas.width, this._canvas.height);
+        this._gameEngine = new GameEngine(
             this,
-            this.camera,
-            this.canvas,
+            this._cam,
+            this._canvas,
             1000 / 60
         );
         this._onAssetsLoaded = () => {
-            this.addChild(this.camera);
-            this.starsLayers = [
+            this.addChild(this._cam);
+            this._starLayers = [
                 new Stars(
                     0.5,
                     30 / 1000,
-                    this.canvasRect,
+                    this._canvasRect,
                     200,
-                    this.window.document
+                    this._window.document
                 ),
                 new Stars(
                     0.3,
                     20 / 1000,
-                    this.canvasRect,
+                    this._canvasRect,
                     200,
-                    this.window.document
+                    this._window.document
                 ),
                 new Stars(
                     0.2,
                     10 / 1000,
-                    this.canvasRect,
+                    this._canvasRect,
                     200,
-                    this.window.document
+                    this._window.document
                 ),
             ];
-            for (const layer of this.starsLayers) {
+            for (const layer of this._starLayers) {
                 this.addChild(layer);
             }
             const fontSrc = this._createFontSource();
-            this.smallFont = new SpriteFont(fontSrc, 1);
-            this.bigFont = new SpriteFont(fontSrc, 1, 2);
+            this._smallFont = new SpriteFont(fontSrc, 1);
+            this._bigFont = new SpriteFont(fontSrc, 1, 2);
             this._enterPressAnyButton();
             this._switchToMusic(this._assetMgr.audioAsset('battle'));
             this._turret = new Turret(
-                this.canvasRect,
+                this._canvasRect,
                 this._assetMgr.imageAsset('alien_bullet'),
                 this._assetMgr.imageAsset('turret')
             );
             this.addChild(this._turret);
-            this.gameEngine.start();
+            this._gameEngine.start();
         };
-        this._assetMgr = new AssetManager(this.window.document, this.rootPath);
+        this._assetMgr = new AssetManager(
+            this._window.document,
+            this._rootPath
+        );
         this._assetMgr.addImageAssets([
             { id: 'player', path: '/images/player.png' },
             { id: 'turret', path: '/images/turret.png' },
@@ -247,51 +285,51 @@ class Main extends GameObject {
     }
 
     _enterPressAnyButton() {
-        this.state = Main.State.PressAnyButton;
+        this._state = Main.State.PressAnyButton;
     }
 
     _enterMainMenu() {
-        this.mainMenu = new MainMenu(
+        this._mainMenu = new MainMenu(
             new Rectangle(
                 new Vector2(0, 0),
-                this.canvas.width,
-                this.canvas.height
+                this._canvas.width,
+                this._canvas.height
             ),
-            this.bigFont
+            this._bigFont
         );
-        this.addChild(this.mainMenu);
-        this.state = Main.State.MainMenu;
+        this.addChild(this._mainMenu);
+        this._state = Main.State.MainMenu;
     }
 
     _enterGameOver() {
-        this.gameOver = new GameOver(
+        this._gameOver = new GameOver(
             new Rectangle(
                 new Vector2(0, 0),
-                this.canvas.width,
-                this.canvas.height
+                this._canvas.width,
+                this._canvas.height
             ),
-            this.bigFont
+            this._bigFont
         );
-        this.addChild(this.gameOver);
-        this.state = Main.State.GameOver;
+        this.addChild(this._gameOver);
+        this._state = Main.State.GameOver;
     }
 
     /**
-     * @param {AudioFile} audioFile
+     * @param {import('jet/audio_file.js').AudioFile} audioFile
      */
     _switchToMusic(audioFile) {
         this._tryStopMusic();
-        this.music = audioFile.htmlElement;
+        this._music = audioFile.htmlElement;
         this._tryStartMusic();
     }
 
     _enterLevel() {
         /** @type {Bullet[]} */
-        this.playerBullets = [];
+        this._playerBullets = [];
         this._player = new Player(
-            this.canvasRect,
+            this._canvasRect,
             this._assetMgr.imageAsset('player'),
-            this.pressedKeys
+            this._pressedKeys
         );
         this.addChild(this._player);
         const asteroidParams = [
@@ -320,8 +358,8 @@ class Main extends GameObject {
                 collider: new Rectangle(new Vector2(42, 66), 142, 85),
             },
         ];
-        this.level = new Level1({
-            dstRect: this.canvasRect,
+        this._level = new Level1({
+            dstRect: this._canvasRect,
             alienLaserSfx: this._assetMgr.audioAsset('alien_laser'),
             alienExplosionSfx: this._assetMgr.audioAsset('alien_explosion'),
             alienImg: this._assetMgr.imageAsset('alien'),
@@ -329,21 +367,21 @@ class Main extends GameObject {
             alienBulletImg: this._assetMgr.imageAsset('alien_bullet'),
             asteroidParams: asteroidParams,
             playerImg: this._assetMgr.imageAsset('player'),
-            pressedKeys: this.pressedKeys,
+            pressedKeys: this._pressedKeys,
         });
-        this.addChild(this.level);
-        this.score = 0;
-        this.bonus = 0;
-        this.statusBar = new StatusBar(
-            this.canvasRect.bottomLeft(),
-            this.canvasRect.width,
-            this.smallFont,
-            this.score,
-            this.bonus,
+        this.addChild(this._level);
+        this._score = 0;
+        this._bonus = 0;
+        this._statusBar = new StatusBar(
+            this._canvasRect.bottomLeft(),
+            this._canvasRect.width,
+            this._smallFont,
+            this._score,
+            this._bonus,
             this._assetMgr.imageAsset('live')
         );
-        this.addChild(this.statusBar);
-        this.state = Main.State.Level;
+        this.addChild(this._statusBar);
+        this._state = Main.State.Level;
     }
 
     _goFromPressAnyButtonToMainMenu() {
@@ -351,25 +389,29 @@ class Main extends GameObject {
     }
 
     _goFromMainMenuToLevel() {
-        this.removeChild(this.mainMenu);
-        this.mainMenu = null;
+        assertNotNull(this._mainMenu);
+        this.removeChild(this._mainMenu);
+        this._mainMenu = null;
         this._enterLevel();
     }
 
     _removeCommonLevelObjects() {
-        this.removeChild(this.statusBar);
-        this.statusBar = null;
-        this.bonus = null;
-        this.score = null;
-        this.removeChild(this.level);
-        this.level = null;
-        for (const bullet of this.playerBullets) {
+        assertNotNull(this._statusBar);
+        this.removeChild(this._statusBar);
+        this._statusBar = null;
+        this._bonus = null;
+        this._score = null;
+        assertNotNull(this._level);
+        this.removeChild(this._level);
+        this._level = null;
+        for (const bullet of this._playerBullets) {
             this.removeChild(bullet);
         }
-        this.playerBullets = null;
+        this._playerBullets = [];
     }
 
     _goFromLevelToGameOver() {
+        assertNotNull(this._player);
         this.removeChild(this._player);
         this._player = null;
         this._enterGameOver();
@@ -378,6 +420,7 @@ class Main extends GameObject {
 
     _goFromLevelToMainMenu() {
         this._removeCommonLevelObjects();
+        assertNotNull(this._player);
         this.removeChild(this._player);
         this._player = null;
         this._enterMainMenu();
@@ -385,35 +428,44 @@ class Main extends GameObject {
 
     _goFromGameOverToMainMenu() {
         this._removeCommonLevelObjects();
-        this.removeChild(this.gameOver);
-        this.gameOver = null;
+        assertNotNull(this._gameOver);
+        this.removeChild(this._gameOver);
+        this._gameOver = null;
         this._enterMainMenu();
         this._switchToMusic(this._assetMgr.audioAsset('battle'));
     }
 
     _handleInteractionsOfPlayerBullets() {
-        for (let idx = this.playerBullets.length - 1; idx >= 0; idx--) {
-            const bullet = this.playerBullets[idx];
+        assertNotNull(this._statusBar);
+        assertNotNull(this._score);
+        assertNotNull(this._level);
+        for (let idx = this._playerBullets.length - 1; idx >= 0; idx--) {
+            const bullet = this._playerBullets[idx];
             if (bullet.outOfSight()) {
                 this.removeChild(bullet);
-                this.playerBullets.splice(idx, 1);
-                if (this.bonus > 0) {
-                    this.bonus -= SCORE_BONUS_DECR_PER_MISS;
-                    this.statusBar.updateScoreBonusStr(this.score, this.bonus);
+                this._playerBullets.splice(idx, 1);
+                if (this._bonus > 0) {
+                    this._bonus -= SCORE_BONUS_DECR_PER_MISS;
+                    this._statusBar.updateScoreBonusStr(
+                        this._score,
+                        this._bonus
+                    );
                 }
             } else {
-                this.level.handlePlayerBulletInteractions(
+                this._level.handlePlayerBulletInteractions(
                     bullet,
                     () => {
-                        this.playerBullets.splice(idx, 1);
+                        this._playerBullets.splice(idx, 1);
                         this.removeChild(bullet);
                     },
                     () => {
-                        this.score += SCORE_PER_HIT + this.bonus;
-                        this.bonus += SCORE_BONUS_INCR_PER_HIT;
-                        this.statusBar.updateScoreBonusStr(
-                            this.score,
-                            this.bonus
+                        assertNotNull(this._statusBar);
+                        assertNotNull(this._score);
+                        this._score += SCORE_PER_HIT + this._bonus;
+                        this._bonus += SCORE_BONUS_INCR_PER_HIT;
+                        this._statusBar.updateScoreBonusStr(
+                            this._score,
+                            this._bonus
                         );
                     }
                 );
@@ -422,57 +474,70 @@ class Main extends GameObject {
     }
 
     _killPlayer = () => {
+        assertNotNull(this._statusBar);
+        assertNotNull(this._score);
+        assertNotNull(this._player);
         const sound = this._assetMgr.audioAsset('player_explosion').htmlElement;
         sound.pause();
         sound.currentTime = 0;
         sound.play();
-        this.bonus = Math.floor(this.bonus / SCORE_BONUS_DIV_PER_DEATH);
-        this.statusBar.updateScoreBonusStr(this.score, this.bonus);
-        this.statusBar.decrNumLives();
+        this._bonus = Math.floor(this._bonus / SCORE_BONUS_DIV_PER_DEATH);
+        this._statusBar.updateScoreBonusStr(this._score, this._bonus);
+        this._statusBar.decrNumLives();
         this._player.respawn();
     };
 
+    /**
+     * @param {number} elapsedMs
+     */
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
-        switch (this.state) {
+        switch (this._state) {
             case Main.State.PressAnyButton:
             case Main.State.MainMenu:
                 break;
             case Main.State.GameOver:
+                assertNotNull(this._level);
                 this._handleInteractionsOfPlayerBullets();
-                this.level.handleAsteroidInteractions();
-                this.level.handleAlienBulletInteractions();
-                this.level.handleAlienShipInteractions();
+                this._level.handleAsteroidInteractions();
+                this._level.handleAlienBulletInteractions();
+                this._level.handleAlienShipInteractions();
                 break;
             case Main.State.Level:
+                assertNotNull(this._level);
+                assertNotNull(this._player);
+                assertNotNull(this._statusBar);
                 this._handleInteractionsOfPlayerBullets();
-                this.level.handleAsteroidInteractions(
+                this._level.handleAsteroidInteractions(
                     this._player,
                     this._killPlayer
                 );
-                this.level.handleAlienBulletInteractions(
+                this._level.handleAlienBulletInteractions(
                     this._player,
                     this._killPlayer
                 );
-                this.level.handleAlienShipInteractions(
+                this._level.handleAlienShipInteractions(
                     this._player,
                     this._killPlayer
                 );
-                if (this.statusBar.numLives() == 0) {
+                if (this._statusBar.numLives() == 0) {
                     this._goFromLevelToGameOver();
                 }
                 break;
         }
     }
 
+    /**
+     * @param {import('jet/drawing_context.js').DrawingContext} drawingContext
+     */
     draw(drawingContext) {
         this.drawChildren(drawingContext);
-        if (this.state == Main.State.PressAnyButton) {
-            this.smallFont.drawString(
+        if (this._state == Main.State.PressAnyButton) {
+            this._smallFont.drawString(
                 drawingContext,
                 new Vector2(
                     3,
-                    this.canvas.height - this.smallFont.lineHeight() - 5
+                    this._canvas.height - this._smallFont.lineHeight() - 5
                 ),
                 'Press any button'
             );
