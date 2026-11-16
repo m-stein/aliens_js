@@ -1,5 +1,6 @@
 import { AlienWave } from './alien_wave.js';
 import { AsteroidWave } from './asteroid_wave.js';
+import { Sequence } from './sequence.js';
 import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
 
@@ -40,7 +41,22 @@ export class Level1 extends GameObject {
             maxSpawnTimeoutMs: 6000,
             onAlienSpawned: this._onAlienSpawned,
         });
+        this._sequence = new Sequence([
+            {
+                ms: 5000,
+                fn: () => {
+                    this._alienWave.changeConfig(1800, 2800);
+                },
+            },
+            {
+                ms: 10000,
+                fn: () => {
+                    this._alienWave.changeConfig(1600, 2600);
+                },
+            },
+        ]);
         this.addChild(this._alienWave);
+        this.addChild(this._sequence);
     }
 
     /**
