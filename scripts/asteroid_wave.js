@@ -32,6 +32,10 @@ export class AsteroidWave extends GameObject {
         }
         /** @type {Asteroid[]} */
         this._asteroids = [];
+
+        /** @type {(() => void) | null} */
+        this._onWindDownFinished = null;
+
         this._spawnTimeout = new Timeout(
             this._newSpawnTimeoutMs(),
             this._spawnAsteroid
@@ -57,6 +61,7 @@ export class AsteroidWave extends GameObject {
             this._asteroids.splice(idx, 1);
         }
         this.removeChild(asteroid);
+        this._finishWindDownIfPossible();
     };
 
     /**
@@ -66,6 +71,15 @@ export class AsteroidWave extends GameObject {
     changeConfig(minSpawnTimeoutMs, maxSpawnTimeoutMs) {
         this._minSpawnTimeoutMs = minSpawnTimeoutMs;
         this._maxSpawnTimeoutMs = maxSpawnTimeoutMs;
+    }
+
+    /**
+     * @param {() => void} onFinished
+     */
+    windDown(onFinished) {
+        this.removeChild(this._spawnTimeout);
+        this._onWindDownFinished = onFinished;
+        this._finishWindDownIfPossible();
     }
 
     /**
@@ -98,6 +112,15 @@ export class AsteroidWave extends GameObject {
         this.addChild(asteroid);
         this._spawnTimeout.set(this._newSpawnTimeoutMs());
     };
+
+    _finishWindDownIfPossible() {
+        if (this._onWindDownFinished === null || this._asteroids.length > 0) {
+            return;
+        }
+        const onFinished = this._onWindDownFinished;
+        this._onWindDownFinished = null;
+        onFinished();
+    }
 
     /**
      * @returns {number}

@@ -60,6 +60,9 @@ export class AlienWave extends GameObject {
         /** @type {import('./alien_bullet.js').AlienBullet[]} */
         this._alienBullets = [];
 
+        /** @type {(() => void) | null} */
+        this._onWindDownFinished = null;
+
         this._dstRect = args.dstRect;
         this._spawnTimeout = new Timeout(
             this._newSpawnTimeoutMs(),
@@ -85,6 +88,18 @@ export class AlienWave extends GameObject {
     changeConfig(minSpawnTimeoutMs, maxSpawnTimeoutMs) {
         this._minSpawnTimeoutMs = minSpawnTimeoutMs;
         this._maxSpawnTimeoutMs = maxSpawnTimeoutMs;
+    }
+
+    /**
+     * @param {() => void} onFinished
+     */
+    windDown(onFinished) {
+        this.removeChild(this._spawnTimeout);
+        this._onWindDownFinished = onFinished;
+        if (!this._burstActive) {
+            this.removeChild(this._burstTimeout);
+        }
+        this._finishWindDownIfPossible();
     }
 
     /**
@@ -128,6 +143,10 @@ export class AlienWave extends GameObject {
 
     _deactivateBurst = () => {
         this._burstActive = false;
+        if (this._onWindDownFinished !== null) {
+            this.removeChild(this._burstTimeout);
+            this._finishWindDownIfPossible();
+        }
     };
 
     _spawnAlien = () => {
@@ -167,7 +186,21 @@ export class AlienWave extends GameObject {
             this._aliens.splice(idx, 1);
         }
         this.removeChild(alien);
+        this._finishWindDownIfPossible();
     };
+
+    _finishWindDownIfPossible() {
+        if (
+            this._onWindDownFinished === null ||
+            this._burstActive ||
+            this._aliens.length > 0
+        ) {
+            return;
+        }
+        const onFinished = this._onWindDownFinished;
+        this._onWindDownFinished = null;
+        onFinished();
+    }
 
     /**
      * @param {import('./alien_bullet.js').AlienBullet} bullet

@@ -1,3 +1,4 @@
+import { assertNotNull } from 'jet/assertions.js';
 import { AlienWave } from './alien_wave.js';
 import { AsteroidWave } from './asteroid_wave.js';
 import { Sequence } from './sequence.js';
@@ -23,78 +24,70 @@ export class Level1 extends GameObject {
      */
     constructor(args) {
         super(new Vector2(0, 0), 'Level1');
-        this._asteroidWave = new AsteroidWave({
-            dstRect: args.dstRect,
-            asteroidParams: args.asteroidParams,
-            minSpawnTimeoutMs: 3000,
-            maxSpawnTimeoutMs: 6000,
-        });
-        this.addChild(this._asteroidWave);
-        this._alienWave = new AlienWave({
-            dstRect: args.dstRect,
-            alienExplosionSfx: args.alienExplosionSfx,
-            alienLaserSfx: args.alienLaserSfx,
-            alienBulletImg: args.alienBulletImg,
-            alienImg: args.alienImg,
-            explosionImg: args.explosionImg,
-            minSpawnTimeoutMs: 4000,
-            maxSpawnTimeoutMs: 6000,
-            onAlienSpawned: this._onAlienSpawned,
-        });
         this._sequence = new Sequence([
             {
-                ms: 5000,
+                ms: 0,
                 fn: () => {
-                    this._alienWave.changeConfig(1800, 2800);
+                    this._alienWave = new AlienWave({
+                        dstRect: args.dstRect,
+                        alienExplosionSfx: args.alienExplosionSfx,
+                        alienLaserSfx: args.alienLaserSfx,
+                        alienBulletImg: args.alienBulletImg,
+                        alienImg: args.alienImg,
+                        explosionImg: args.explosionImg,
+                        minSpawnTimeoutMs: 4000,
+                        maxSpawnTimeoutMs: 6000,
+                        onAlienSpawned: this._onAlienSpawned,
+                    });
+                    this.addChild(this._alienWave);
                 },
             },
             {
                 ms: 10000,
                 fn: () => {
-                    this._alienWave.changeConfig(1600, 2600);
+                    this._asteroidWave = new AsteroidWave({
+                        dstRect: args.dstRect,
+                        asteroidParams: args.asteroidParams,
+                        minSpawnTimeoutMs: 3000,
+                        maxSpawnTimeoutMs: 6000,
+                    });
+                    this.addChild(this._asteroidWave);
+                },
+            },
+            {
+                ms: 20000,
+                fn: () => {
+                    assertNotNull(this._alienWave);
+                    const alienWave = this._alienWave;
+                    alienWave.windDown(() => {
+                        this.removeChild(alienWave);
+                        if (this._alienWave === alienWave) {
+                            this._alienWave = null;
+                        }
+                    });
+                },
+            },
+            {
+                ms: 30000,
+                fn: () => {
+                    assertNotNull(this._asteroidWave);
+                    const asteroidWave = this._asteroidWave;
+                    asteroidWave.windDown(() => {
+                        this.removeChild(asteroidWave);
+                        if (this._asteroidWave === asteroidWave) {
+                            this._asteroidWave = null;
+                        }
+                    });
                 },
             },
         ]);
-        this.addChild(this._alienWave);
         this.addChild(this._sequence);
     }
 
     /**
      * @param {number} _numAliensSpawned
      */
-    _onAlienSpawned = (_numAliensSpawned) => {
-        /*
-        switch (numAliensSpawned) {
-            case 5: // +5
-                this._alienWave.changeConfig(1800, 2800);
-                break;
-            case 11: // +6
-                this._alienWave.changeConfig(1600, 2600);
-                break;
-            case 18: // +7
-                this._alienWave.changeConfig(1400, 2400);
-                break;
-            case 26: // +8
-                this._alienWave.changeConfig(1200, 2200);
-                break;
-            case 35: // +9
-                this._alienWave.changeConfig(1000, 2000);
-                break;
-            case 45: // + 10
-                this._alienWave.changeConfig(800, 1800);
-                break;
-            case 56: // + 11
-                this._alienWave.changeConfig(600, 1600);
-                break;
-            case 68: // + 12
-                this._alienWave.changeConfig(400, 1400);
-                break;
-            case 81: // + 13
-                this._alienWave.changeConfig(200, 1200);
-                break;
-        }
-        */
-    };
+    _onAlienSpawned = (_numAliensSpawned) => {};
 
     /**
      * @param {import('./bullet.js').Bullet} bullet
@@ -103,29 +96,35 @@ export class Level1 extends GameObject {
      */
     handlePlayerBulletInteractions(bullet, onHit, onScored) {
         let hit = false;
-        this._alienWave.forEachAlien((alien) => {
-            if (hit || !alien.vulnerable()) {
-                return;
-            }
-            if (bullet.collider().intersectsWith(alien.collider())) {
-                alien.startExplosion(this._alienWave.removeAlien);
-                onHit();
-                onScored();
-                hit = true;
-            }
-        });
+        const alienWave = this._alienWave;
+        if (alienWave) {
+            alienWave.forEachAlien((alien) => {
+                if (hit || !alien.vulnerable()) {
+                    return;
+                }
+                if (bullet.collider().intersectsWith(alien.collider())) {
+                    alien.startExplosion(alienWave.removeAlien);
+                    onHit();
+                    onScored();
+                    hit = true;
+                }
+            });
+        }
         if (hit) {
             return;
         }
-        this._asteroidWave.forEachAsteroid((asteroid) => {
-            if (hit) {
-                return;
-            }
-            if (bullet.collider().intersectsWith(asteroid.collider())) {
-                onHit();
-                hit = true;
-            }
-        });
+        const asteroidWave = this._asteroidWave;
+        if (asteroidWave) {
+            asteroidWave.forEachAsteroid((asteroid) => {
+                if (hit) {
+                    return;
+                }
+                if (bullet.collider().intersectsWith(asteroid.collider())) {
+                    onHit();
+                    hit = true;
+                }
+            });
+        }
     }
 
     /**
@@ -136,18 +135,21 @@ export class Level1 extends GameObject {
         player = undefined,
         onPlayerCollision = () => {}
     ) {
-        this._alienWave.forEachAlien((alien) => {
-            if (alien.finishedManeuver()) {
-                this._alienWave.removeAlien(alien);
-            } else if (player) {
-                if (!player.vulnerable()) {
-                    return;
+        const alienWave = this._alienWave;
+        if (alienWave) {
+            alienWave.forEachAlien((alien) => {
+                if (alien.finishedManeuver()) {
+                    alienWave.removeAlien(alien);
+                } else if (player) {
+                    if (!player.vulnerable()) {
+                        return;
+                    }
+                    if (alien.collider().intersectsWith(player.collider())) {
+                        onPlayerCollision();
+                    }
                 }
-                if (alien.collider().intersectsWith(player.collider())) {
-                    onPlayerCollision();
-                }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -158,18 +160,21 @@ export class Level1 extends GameObject {
         player = undefined,
         onPlayerCollision = () => {}
     ) {
-        this._asteroidWave.forEachAsteroid((asteroid) => {
-            if (asteroid.finishedManeuver()) {
-                this._asteroidWave.removeAsteroid(asteroid);
-            } else if (player) {
-                if (!player.vulnerable()) {
-                    return;
+        const asteroidWave = this._asteroidWave;
+        if (asteroidWave) {
+            asteroidWave.forEachAsteroid((asteroid) => {
+                if (asteroid.finishedManeuver()) {
+                    asteroidWave.removeAsteroid(asteroid);
+                } else if (player) {
+                    if (!player.vulnerable()) {
+                        return;
+                    }
+                    if (asteroid.collider().intersectsWith(player.collider())) {
+                        onPlayerCollision();
+                    }
                 }
-                if (asteroid.collider().intersectsWith(player.collider())) {
-                    onPlayerCollision();
-                }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -177,19 +182,22 @@ export class Level1 extends GameObject {
      * @param {() => void} onPlayerHit
      */
     handleAlienBulletInteractions(player = undefined, onPlayerHit = () => {}) {
-        this._alienWave.forEachAlienBullet((bullet) => {
-            if (bullet.outOfSight()) {
-                this._alienWave.removeAlienBullet(bullet);
-            } else if (player) {
-                if (!player.vulnerable()) {
-                    return;
+        const alienWave = this._alienWave;
+        if (alienWave) {
+            alienWave.forEachAlienBullet((bullet) => {
+                if (bullet.outOfSight()) {
+                    alienWave.removeAlienBullet(bullet);
+                } else if (player) {
+                    if (!player.vulnerable()) {
+                        return;
+                    }
+                    if (bullet.collider().intersectsWith(player.collider())) {
+                        alienWave.removeAlienBullet(bullet);
+                        onPlayerHit();
+                    }
                 }
-                if (bullet.collider().intersectsWith(player.collider())) {
-                    this._alienWave.removeAlienBullet(bullet);
-                    onPlayerHit();
-                }
-            }
-        });
+            });
+        }
     }
 
     /**
