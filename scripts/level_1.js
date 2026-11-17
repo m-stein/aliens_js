@@ -1,6 +1,7 @@
 import { assertNotNull } from 'jet/assertions.js';
 import { AlienWave } from './alien_wave.js';
 import { AsteroidWave } from './asteroid_wave.js';
+import { TurretWave } from './turret_wave.js';
 import { Sequence } from './sequence.js';
 import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
@@ -14,6 +15,7 @@ export class Level1 extends GameObject {
      *   alienImg: import('jet/image_file.js').ImageFile,
      *   explosionImg: import('jet/image_file.js').ImageFile,
      *   alienBulletImg: import('jet/image_file.js').ImageFile
+     *   turretImg: import('jet/image_file.js').ImageFile
      *   playerImg: import('jet/image_file.js').ImageFile
      *   pressedKeys: Set<string>
      *   asteroidParams: {
@@ -40,6 +42,14 @@ export class Level1 extends GameObject {
                         onAlienSpawned: this._onAlienSpawned,
                     });
                     this.addChild(this._alienWave);
+                    this._turretWave = new TurretWave({
+                        dstRect: args.dstRect,
+                        bulletImg: args.alienBulletImg,
+                        turretImg: args.turretImg,
+                        minSpawnTimeoutMs: 20000,
+                        maxSpawnTimeoutMs: 40000,
+                    });
+                    this.addChild(this._turretWave);
                 },
             },
             {
@@ -80,6 +90,19 @@ export class Level1 extends GameObject {
                     });
                 },
             },
+            {
+                ms: 35000,
+                fn: () => {
+                    assertNotNull(this._turretWave);
+                    const turretWave = this._turretWave;
+                    turretWave.windDown(() => {
+                        this.removeChild(turretWave);
+                        if (this._turretWave === turretWave) {
+                            this._turretWave = null;
+                        }
+                    });
+                },
+            },
         ]);
         this.addChild(this._sequence);
     }
@@ -113,6 +136,21 @@ export class Level1 extends GameObject {
         if (hit) {
             return;
         }
+        const turretWave = this._turretWave;
+        if (turretWave) {
+            turretWave.forEachTurret((turret) => {
+                if (hit) {
+                    return;
+                }
+                if (bullet.collider().intersectsWith(turret.collider())) {
+                    onHit();
+                    hit = true;
+                }
+            });
+        }
+        if (hit) {
+            return;
+        }
         const asteroidWave = this._asteroidWave;
         if (asteroidWave) {
             asteroidWave.forEachAsteroid((asteroid) => {
@@ -122,6 +160,47 @@ export class Level1 extends GameObject {
                 if (bullet.collider().intersectsWith(asteroid.collider())) {
                     onHit();
                     hit = true;
+                }
+            });
+        }
+    }
+
+    /**
+     * @param {import('./player.js').Player | undefined} player
+     * @param {() => void} onPlayerCollision
+     */
+    handleTurretInteractions(player = undefined, onPlayerCollision = () => {}) {
+        const turretWave = this._turretWave;
+        if (turretWave) {
+            turretWave.forEachTurret((turret) => {
+                if (turret.finishedManeuver()) {
+                    turretWave.removeTurret(turret);
+                } else if (
+                    player?.vulnerable() &&
+                    turret.collider().intersectsWith(player.collider())
+                ) {
+                    onPlayerCollision();
+                }
+            });
+        }
+    }
+
+    /**
+     * @param {import('./player.js').Player | undefined} player
+     * @param {() => void} onPlayerHit
+     */
+    handleTurretBulletInteractions(player = undefined, onPlayerHit = () => {}) {
+        const turretWave = this._turretWave;
+        if (turretWave) {
+            turretWave.forEachBullet((bullet) => {
+                if (turretWave.bulletOutOfSight(bullet)) {
+                    turretWave.removeBullet(bullet);
+                } else if (
+                    player?.vulnerable() &&
+                    bullet.collider().intersectsWith(player.collider())
+                ) {
+                    turretWave.removeBullet(bullet);
+                    onPlayerHit();
                 }
             });
         }

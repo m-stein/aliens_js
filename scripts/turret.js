@@ -5,21 +5,25 @@ import { AlienBullet } from './alien_bullet.js';
 import { Timeout } from 'jet/timeout.js';
 import { Sprite } from 'jet/sprite.js';
 import { TimedValue } from 'jet/timed_value.js';
-import { Container } from 'jet/container.js';
 import { angleToUnitVector } from 'jet/math.js';
+import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 
 export class Turret extends GameObject {
     /**
-     * @param {Rectangle} envRect
-     * @param {import('jet/image_file.js').ImageFile} bulletImg
-     * @param {import('jet/image_file.js').ImageFile} turretImg
+     * @param {{
+     *   envRect: Rectangle,
+     *   position: Vector2,
+     *   addBulletFn: (bullet: AlienBullet) => void,
+     *   bulletImg: import('jet/image_file.js').ImageFile,
+     *   turretImg: import('jet/image_file.js').ImageFile
+     * }} args
      */
-    constructor(envRect, bulletImg, turretImg) {
-        super(new Vector2(50, 50), 'Turret');
+    constructor(args) {
+        super(args.position.copy(), 'Turret');
 
-        this._bulletImg = bulletImg;
-        this._turretImg = turretImg;
-        this._envRect = envRect;
+        this._addBulletFn = args.addBulletFn;
+        this._bulletImg = args.bulletImg;
+        this._envRect = args.envRect;
         this._fireIntervalMs = 200;
 
         this._timeout = new Timeout(this._fireIntervalMs, () => {
@@ -40,10 +44,12 @@ export class Turret extends GameObject {
         this._colliderOffset = new Vector2(8, 8);
         this._colliderSize = new Vector2(16, 16);
 
-        this._bullets = new Container();
-        this.addChild(this._bullets);
-
-        this._turretSprite = new Sprite(turretImg, new Vector2(32, 32), 8, 1);
+        this._turretSprite = new Sprite(
+            args.turretImg,
+            new Vector2(32, 32),
+            8,
+            1
+        );
         this.addChild(this._turretSprite);
 
         this._fireRotationDurationMs = 3100;
@@ -56,6 +62,9 @@ export class Turret extends GameObject {
      */
     draw(drawingContext) {
         this.drawChildren(drawingContext);
+        if (DRAW_COLLIDERS) {
+            drawingContext.drawRect(this.collider(), DRAW_COLLIDERS_COLOR);
+        }
     }
 
     /**
@@ -71,29 +80,26 @@ export class Turret extends GameObject {
             this._fireRotationDurationMs;
         const t = this._fireRotationElapsedMs / this._fireRotationDurationMs;
         this._fireRotationAngle = t * 360;
-        this._bullets.forEachChild((child) => {
-            const absPos = child.position.copy().add(this.position);
-            if (
-                absPos.x <= this._envRect.left - 8 ||
-                absPos.x >= this._envRect.right ||
-                absPos.y <= this._envRect.top - 8 ||
-                absPos.y >= this._envRect.bottom
-            ) {
-                this._bullets.removeChild(child);
-            }
-        });
     }
 
     _fireBullet() {
-        const bullet = new AlienBullet(
-            new Vector2(16, 20),
-            this._envRect.height,
-            this._bulletImg,
-            angleToUnitVector(this._fireRotationAngle),
-            50 / 1000
+        this._addBulletFn(
+            new AlienBullet(
+                new Vector2(this.position.x + 16, this.position.y + 20),
+                this._envRect.height,
+                this._bulletImg,
+                angleToUnitVector(this._fireRotationAngle),
+                50 / 1000
+            )
         );
-        this._bullets.addChild(bullet);
         this._timeout.set(this._fireIntervalMs);
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    finishedManeuver() {
+        return this.position.y > this._envRect.bottom;
     }
 
     collider() {

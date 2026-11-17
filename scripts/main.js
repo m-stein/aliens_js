@@ -25,7 +25,6 @@ import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
 import { MainMenu } from './main_menu.js';
 import { GameOver } from './game_over.js';
 import { Level1 } from './level_1.js';
-import { Turret } from './turret.js';
 
 const MAX_NUM_PLAYER_BULLETS = 3;
 
@@ -228,12 +227,6 @@ class Main extends GameObject {
             this._bigFont = new SpriteFont(fontSrc, 1, 2);
             this._enterPressAnyButton();
             this._switchToMusic(this._assetMgr.audioAsset('battle'));
-            this._turret = new Turret(
-                this._canvasRect,
-                this._assetMgr.imageAsset('alien_bullet'),
-                this._assetMgr.imageAsset('turret')
-            );
-            this.addChild(this._turret);
             this._gameEngine.start();
         };
         this._assetMgr = new AssetManager(
@@ -365,6 +358,7 @@ class Main extends GameObject {
             alienImg: this._assetMgr.imageAsset('alien'),
             explosionImg: this._assetMgr.imageAsset('explosion'),
             alienBulletImg: this._assetMgr.imageAsset('alien_bullet'),
+            turretImg: this._assetMgr.imageAsset('turret'),
             asteroidParams: asteroidParams,
             playerImg: this._assetMgr.imageAsset('player'),
             pressedKeys: this._pressedKeys,
@@ -502,6 +496,8 @@ class Main extends GameObject {
                 this._level.handleAsteroidInteractions();
                 this._level.handleAlienBulletInteractions();
                 this._level.handleAlienShipInteractions();
+                this._level.handleTurretBulletInteractions();
+                this._level.handleTurretInteractions();
                 break;
             case Main.State.Level:
                 assertNotNull(this._level);
@@ -517,6 +513,14 @@ class Main extends GameObject {
                     this._killPlayer
                 );
                 this._level.handleAlienShipInteractions(
+                    this._player,
+                    this._killPlayer
+                );
+                this._level.handleTurretBulletInteractions(
+                    this._player,
+                    this._killPlayer
+                );
+                this._level.handleTurretInteractions(
                     this._player,
                     this._killPlayer
                 );
