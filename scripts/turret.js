@@ -6,16 +6,26 @@ import { Timeout } from 'jet/timeout.js';
 import { Sprite } from 'jet/sprite.js';
 import { TimedValue } from 'jet/timed_value.js';
 import { angleToUnitVector } from 'jet/math.js';
+import { createEnum } from 'jet/enum.js';
 import { DRAW_COLLIDERS, DRAW_COLLIDERS_COLOR } from './parameters.js';
 
 export class Turret extends GameObject {
+    static State = createEnum({
+        Alive: 0,
+        Exploding1: 1,
+        Exploding2: 2,
+        Destroyed: 3,
+    });
+
     /**
      * @param {{
      *   envRect: Rectangle,
      *   position: Vector2,
      *   addBulletFn: (bullet: AlienBullet) => void,
      *   bulletImg: import('jet/image_file.js').ImageFile,
-     *   turretImg: import('jet/image_file.js').ImageFile
+     *   turretImg: import('jet/image_file.js').ImageFile,
+     *   explosionSound: import('jet/audio_file.js').AudioFile,
+     *   explosionImg: import('jet/image_file.js').ImageFile
      * }} args
      */
     constructor(args) {
@@ -25,6 +35,10 @@ export class Turret extends GameObject {
         this._bulletImg = args.bulletImg;
         this._envRect = args.envRect;
         this._fireIntervalMs = 200;
+        this._numHits = 0;
+        this._state = Turret.State.Alive;
+        /** @type {((turret: Turret) => void)} */
+        this._explosionFinishedFn = (_turret) => {};
 
         this._timeout = new Timeout(this._fireIntervalMs, () => {
             this._fireBullet();
@@ -52,6 +66,38 @@ export class Turret extends GameObject {
         );
         this.addChild(this._turretSprite);
 
+        this._explosionSound = args.explosionSound;
+        this._explosionSprite = new Sprite(
+            args.explosionImg,
+            new Vector2(32, 32),
+            21,
+            1
+        );
+        const explosionFrameMs = 30;
+        this._explosionFrameIdx = new TimedValue([
+            { ms: explosionFrameMs, value: 0 },
+            { ms: explosionFrameMs, value: 1 },
+            { ms: explosionFrameMs, value: 2 },
+            { ms: explosionFrameMs, value: 3 },
+            { ms: explosionFrameMs, value: 4 },
+            { ms: explosionFrameMs, value: 5 },
+            { ms: explosionFrameMs, value: 6 },
+            { ms: explosionFrameMs, value: 7 },
+            { ms: explosionFrameMs, value: 8 },
+            { ms: explosionFrameMs, value: 9 },
+            { ms: explosionFrameMs, value: 10 },
+            { ms: explosionFrameMs, value: 11 },
+            { ms: explosionFrameMs, value: 12 },
+            { ms: explosionFrameMs, value: 13 },
+            { ms: explosionFrameMs, value: 14 },
+            { ms: explosionFrameMs, value: 15 },
+            { ms: explosionFrameMs, value: 16 },
+            { ms: explosionFrameMs, value: 17 },
+            { ms: explosionFrameMs, value: 18 },
+            { ms: explosionFrameMs, value: 19 },
+            { ms: 10000000, value: 20 },
+        ]);
+
         this._fireRotationDurationMs = 3100;
         this._fireRotationElapsedMs = 0;
         this._fireRotationAngle = 0;
@@ -72,14 +118,48 @@ export class Turret extends GameObject {
      */
     update(elapsedMs) {
         this.updateChildren(elapsedMs);
-        this._turretSprite.goToFrame(this._turretFrameIdx.value());
-        this.position.y += elapsedMs / 100;
+        switch (this._state) {
+            case Turret.State.Alive: {
+                this._turretSprite.goToFrame(this._turretFrameIdx.value());
+                this.position.y += elapsedMs / 100;
 
-        this._fireRotationElapsedMs =
-            (this._fireRotationElapsedMs + elapsedMs) %
-            this._fireRotationDurationMs;
-        const t = this._fireRotationElapsedMs / this._fireRotationDurationMs;
-        this._fireRotationAngle = t * 360;
+                this._fireRotationElapsedMs =
+                    (this._fireRotationElapsedMs + elapsedMs) %
+                    this._fireRotationDurationMs;
+                const t =
+                    this._fireRotationElapsedMs / this._fireRotationDurationMs;
+                this._fireRotationAngle = t * 360;
+                break;
+            }
+
+            case Turret.State.Exploding1:
+                this._explosionSprite.goToFrame(
+                    this._explosionFrameIdx.value()
+                );
+                if (this._explosionFrameIdx.value() < 10) {
+                    this._turretSprite.goToFrame(this._turretFrameIdx.value());
+                } else {
+                    this.removeChild(this._turretSprite);
+                    this.removeChild(this._turretFrameIdx);
+                    this._state = Turret.State.Exploding2;
+                }
+                break;
+
+            case Turret.State.Exploding2:
+                this._explosionSprite.goToFrame(
+                    this._explosionFrameIdx.value()
+                );
+                if (this._explosionFrameIdx.value() >= 20) {
+                    this.removeChild(this._explosionSprite);
+                    this.removeChild(this._explosionFrameIdx);
+                    this._state = Turret.State.Destroyed;
+                    this._explosionFinishedFn(this);
+                }
+                break;
+
+            case Turret.State.Destroyed:
+                break;
+        }
     }
 
     _fireBullet() {
@@ -103,13 +183,53 @@ export class Turret extends GameObject {
     }
 
     collider() {
-        return new Rectangle(
-            new Vector2(
-                this.position.x + this._colliderOffset.x,
-                this.position.y + this._colliderOffset.y
-            ),
-            this._colliderSize.x,
-            this._colliderSize.y
-        );
+        switch (this._state) {
+            case Turret.State.Alive:
+            case Turret.State.Exploding1:
+                return new Rectangle(
+                    new Vector2(
+                        this.position.x + this._colliderOffset.x,
+                        this.position.y + this._colliderOffset.y
+                    ),
+                    this._colliderSize.x,
+                    this._colliderSize.y
+                );
+        }
+        return new Rectangle(new Vector2(0, 0), 0, 0);
+    }
+
+    /**
+     * @param {((turret: Turret) => void)} finishedFn
+     * @returns {boolean} Whether this hit destroyed the turret.
+     */
+    hit(finishedFn) {
+        if (!this.vulnerable()) {
+            return false;
+        }
+
+        this._numHits++;
+        if (this._numHits < 2) {
+            return false;
+        }
+
+        this._explosionFinishedFn = finishedFn;
+        this._state = Turret.State.Exploding1;
+        this.removeChild(this._timeout);
+        this._explosionFrameIdx.startPhase(0);
+        this.addChild(this._explosionSprite);
+        this.addChild(this._explosionFrameIdx);
+
+        const sound = this._explosionSound.htmlElement;
+        sound.pause();
+        sound.currentTime = 0;
+        sound.play();
+        return true;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    vulnerable() {
+        return this._state === Turret.State.Alive;
     }
 }

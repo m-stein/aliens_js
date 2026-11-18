@@ -5,6 +5,12 @@ import { TurretWave } from './turret_wave.js';
 import { Sequence } from './sequence.js';
 import { GameObject } from 'jet/game_object.js';
 import { Vector2 } from 'jet/vector_2.js';
+import {
+    SCORE_BONUS_INCR_PER_ALIEN,
+    SCORE_BONUS_INCR_PER_TURRET,
+    SCORE_PER_ALIEN,
+    SCORE_PER_TURRET,
+} from './parameters.js';
 
 export class Level1 extends GameObject {
     /**
@@ -46,6 +52,8 @@ export class Level1 extends GameObject {
                         dstRect: args.dstRect,
                         bulletImg: args.alienBulletImg,
                         turretImg: args.turretImg,
+                        explosionSound: args.alienExplosionSfx,
+                        explosionImg: args.explosionImg,
                         minSpawnTimeoutMs: 20000,
                         maxSpawnTimeoutMs: 40000,
                     });
@@ -115,7 +123,7 @@ export class Level1 extends GameObject {
     /**
      * @param {import('./bullet.js').Bullet} bullet
      * @param {() => void} onHit
-     * @param {() => void} onScored
+     * @param {(baseScore: number, bonusIncrease: number) => void} onScored
      */
     handlePlayerBulletInteractions(bullet, onHit, onScored) {
         let hit = false;
@@ -128,7 +136,7 @@ export class Level1 extends GameObject {
                 if (bullet.collider().intersectsWith(alien.collider())) {
                     alien.startExplosion(alienWave.removeAlien);
                     onHit();
-                    onScored();
+                    onScored(SCORE_PER_ALIEN, SCORE_BONUS_INCR_PER_ALIEN);
                     hit = true;
                 }
             });
@@ -139,11 +147,15 @@ export class Level1 extends GameObject {
         const turretWave = this._turretWave;
         if (turretWave) {
             turretWave.forEachTurret((turret) => {
-                if (hit) {
+                if (hit || !turret.vulnerable()) {
                     return;
                 }
                 if (bullet.collider().intersectsWith(turret.collider())) {
+                    const destroyed = turret.hit(turretWave.removeTurret);
                     onHit();
+                    if (destroyed) {
+                        onScored(SCORE_PER_TURRET, SCORE_BONUS_INCR_PER_TURRET);
+                    }
                     hit = true;
                 }
             });

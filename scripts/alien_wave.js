@@ -193,7 +193,8 @@ export class AlienWave extends GameObject {
         if (
             this._onWindDownFinished === null ||
             this._burstActive ||
-            this._aliens.length > 0
+            this._aliens.length > 0 ||
+            this._alienBullets.length > 0
         ) {
             return;
         }
@@ -211,5 +212,6 @@ export class AlienWave extends GameObject {
             this._alienBullets.splice(idx, 1);
         }
         this.removeChild(bullet);
+        this._finishWindDownIfPossible();
     }
 }

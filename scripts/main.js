@@ -18,8 +18,6 @@ import { Bullet } from './bullet.js';
 import {
     SCORE_BONUS_DECR_PER_MISS,
     SCORE_BONUS_DIV_PER_DEATH,
-    SCORE_BONUS_INCR_PER_HIT,
-    SCORE_PER_HIT,
 } from './parameters.js';
 import { STATUS_BAR_HEIGHT, StatusBar } from './status_bar.js';
 import { MainMenu } from './main_menu.js';
@@ -452,11 +450,11 @@ class Main extends GameObject {
                         this._playerBullets.splice(idx, 1);
                         this.removeChild(bullet);
                     },
-                    () => {
+                    (baseScore, bonusIncrease) => {
                         assertNotNull(this._statusBar);
                         assertNotNull(this._score);
-                        this._score += SCORE_PER_HIT + this._bonus;
-                        this._bonus += SCORE_BONUS_INCR_PER_HIT;
+                        this._score += baseScore + this._bonus;
+                        this._bonus += bonusIncrease;
                         this._statusBar.updateScoreBonusStr(
                             this._score,
                             this._bonus

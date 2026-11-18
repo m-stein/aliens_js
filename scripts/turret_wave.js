@@ -10,6 +10,8 @@ export class TurretWave extends GameObject {
      *   dstRect: import('jet/rectangle.js').Rectangle,
      *   bulletImg: import('jet/image_file.js').ImageFile,
      *   turretImg: import('jet/image_file.js').ImageFile,
+     *   explosionSound: import('jet/audio_file.js').AudioFile,
+     *   explosionImg: import('jet/image_file.js').ImageFile,
      *   minSpawnTimeoutMs: number,
      *   maxSpawnTimeoutMs: number
      * }} args
@@ -19,6 +21,8 @@ export class TurretWave extends GameObject {
         this._dstRect = args.dstRect;
         this._bulletImg = args.bulletImg;
         this._turretImg = args.turretImg;
+        this._explosionSound = args.explosionSound;
+        this._explosionImg = args.explosionImg;
         this._minSpawnTimeoutMs = args.minSpawnTimeoutMs;
         this._maxSpawnTimeoutMs = args.maxSpawnTimeoutMs;
 
@@ -75,6 +79,7 @@ export class TurretWave extends GameObject {
             this._bullets.splice(idx, 1);
         }
         this.removeChild(bullet);
+        this._finishWindDownIfPossible();
     }
 
     /**
@@ -137,6 +142,8 @@ export class TurretWave extends GameObject {
             },
             bulletImg: this._bulletImg,
             turretImg: this._turretImg,
+            explosionSound: this._explosionSound,
+            explosionImg: this._explosionImg,
         });
         this._turrets.push(turret);
         this.addChild(turret);
@@ -144,7 +151,11 @@ export class TurretWave extends GameObject {
     };
 
     _finishWindDownIfPossible() {
-        if (this._onWindDownFinished === null || this._turrets.length > 0) {
+        if (
+            this._onWindDownFinished === null ||
+            this._turrets.length > 0 ||
+            this._bullets.length > 0
+        ) {
             return;
         }
         const onFinished = this._onWindDownFinished;
